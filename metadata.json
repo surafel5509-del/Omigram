@@ -1,0 +1,6 @@
+{
+  "name": "Omigram",
+  "description": "A modern, high-fidelity social application featuring card-based story carousels, floating pill navigation bars, personalized profile cards, interactive media feeds, settings, and direct messaging.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
