@@ -1,10 +1,5 @@
 package com.example.presentation.common
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,12 +18,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SmartDisplay
 import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.SmartDisplay
@@ -51,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import com.example.ui.theme.SocialBrandBlue
 import com.example.ui.theme.SocialPillDark
 
+/** Shared floating navigation used across Omigram's social surfaces. */
 enum class SocialNavTab(
     val title: String,
     val filledIcon: ImageVector,
@@ -60,7 +54,7 @@ enum class SocialNavTab(
     HOME("Home", Icons.Filled.Home, Icons.Outlined.Home, "pill_tab_home"),
     REELS("Reels", Icons.Filled.SmartDisplay, Icons.Outlined.SmartDisplay, "pill_tab_reels"),
     NOTIFICATIONS("Alerts", Icons.Outlined.Notifications, Icons.Outlined.Notifications, "pill_tab_notifications"),
-    FRIENDS("Friends", Icons.Outlined.Group, Icons.Outlined.Group, "pill_tab_friends"),
+    FRIENDS("Profile", Icons.Outlined.Group, Icons.Outlined.Group, "pill_tab_friends"),
     SETTINGS("Settings", Icons.Outlined.Settings, Icons.Outlined.Settings, "pill_tab_settings")
 }
 
@@ -80,7 +74,7 @@ fun FloatingPillNavBar(
         modifier = modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 10.dp),
+            .padding(horizontal = 14.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center
     ) {
         Row(
@@ -88,44 +82,39 @@ fun FloatingPillNavBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Main Frosted Pill container
             Surface(
                 modifier = Modifier
                     .weight(1f)
                     .height(60.dp)
                     .shadow(
-                        elevation = 10.dp,
+                        elevation = 12.dp,
                         shape = CircleShape,
                         spotColor = Color.Black.copy(alpha = 0.12f),
-                        ambientColor = Color.Black.copy(alpha = 0.06f)
+                        ambientColor = Color.Black.copy(alpha = 0.05f)
                     )
                     .testTag("floating_pill_nav_bar"),
                 shape = CircleShape,
-                color = Color.White.copy(alpha = 0.94f),
+                color = Color.White.copy(alpha = 0.96f),
                 border = androidx.compose.foundation.BorderStroke(
                     width = 1.dp,
-                    color = Color(0xFFE5E7EB).copy(alpha = 0.85f)
+                    color = Color(0xFFE5E6EA).copy(alpha = 0.9f)
                 )
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
+                        .padding(horizontal = 7.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val tabs = listOf(
+                    listOf(
                         SocialNavTab.HOME,
                         SocialNavTab.REELS,
                         SocialNavTab.NOTIFICATIONS,
                         SocialNavTab.FRIENDS
-                    )
-
-                    tabs.forEach { tab ->
-                        val isSelected = selectedTab == tab
-
-                        if (isSelected) {
-                            // Active Capsule Pill
+                    ).forEach { tab ->
+                        val selected = selectedTab == tab
+                        if (selected) {
                             Row(
                                 modifier = Modifier
                                     .clip(CircleShape)
@@ -134,7 +123,7 @@ fun FloatingPillNavBar(
                                         interactionSource = interactionSource,
                                         indication = null
                                     ) { onTabSelected(tab) }
-                                    .padding(horizontal = 14.dp, vertical = 8.dp)
+                                    .padding(horizontal = 13.dp, vertical = 8.dp)
                                     .testTag(tab.testTag),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.Center
@@ -145,16 +134,15 @@ fun FloatingPillNavBar(
                                     tint = Color.White,
                                     modifier = Modifier.size(20.dp)
                                 )
-                                Spacer(modifier = Modifier.width(6.dp))
+                                Spacer(Modifier.width(6.dp))
                                 Text(
                                     text = tab.title,
-                                    fontSize = 13.sp,
+                                    fontSize = 12.5.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     color = Color.White
                                 )
                             }
                         } else {
-                            // Inactive Tab Icon
                             Box(
                                 modifier = Modifier
                                     .size(44.dp)
@@ -169,7 +157,7 @@ fun FloatingPillNavBar(
                                 Icon(
                                     imageVector = tab.outlinedIcon,
                                     contentDescription = tab.title,
-                                    tint = Color(0xFF1C1C1E),
+                                    tint = Color(0xFF292A2F),
                                     modifier = Modifier.size(22.dp)
                                 )
                             }
@@ -178,16 +166,15 @@ fun FloatingPillNavBar(
                 }
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(Modifier.width(11.dp))
 
-            // Vibrant Floating Circular Action Button
             Box(
                 modifier = Modifier
-                    .size(56.dp)
+                    .size(58.dp)
                     .shadow(
-                        elevation = 8.dp,
+                        elevation = 10.dp,
                         shape = CircleShape,
-                        spotColor = actionButtonColor.copy(alpha = 0.45f)
+                        spotColor = actionButtonColor.copy(alpha = 0.35f)
                     )
                     .clip(CircleShape)
                     .background(actionButtonColor)
@@ -197,7 +184,7 @@ fun FloatingPillNavBar(
             ) {
                 Icon(
                     imageVector = actionButtonIcon,
-                    contentDescription = "Action",
+                    contentDescription = "Create",
                     tint = Color.White,
                     modifier = Modifier.size(28.dp)
                 )

@@ -3,65 +3,55 @@ package com.example.ui.theme
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
-// Instagram and Modern Social Palette
-val OmigramBackground = Color(0xFFFFFFFF)        // Pure White
-val OmigramSecondaryBackground = Color(0xFFF8F9FA)
-val OmigramPrimaryText = Color(0xFF111111)
-val OmigramSecondaryText = Color(0xFF71767B)
-val OmigramBorder = Color(0xFFE5E7EB)
-val OmigramAccentBlue = Color(0xFF1877F2)        // Modern Vibrant Blue
-val OmigramErrorRed = Color(0xFFED4956)
-val OmigramSuccessGreen = Color(0xFF34C759)
+/** Omigram visual system: inspired by the supplied soft social references, but intentionally original. */
+val OmigramBackground = Color(0xFFFFFCFA)
+val OmigramSecondaryBackground = Color(0xFFF6F7F9)
+val OmigramPrimaryText = Color(0xFF17171A)
+val OmigramSecondaryText = Color(0xFF74747C)
+val OmigramBorder = Color(0xFFE6E7EB)
+val OmigramAccentBlue = Color(0xFF5B5FEF)
+val OmigramBrandIndigo = Color(0xFF5B5FEF)
+val OmigramBrandCoral = Color(0xFFFF6B5F)
+val OmigramErrorRed = Color(0xFFE5484D)
+val OmigramSuccessGreen = Color(0xFF22C55E)
 
-// Screenshot Signature Colors
-val SocialBrandBlue = Color(0xFF1877F2)
-val SocialPillDark = Color(0xFF1C1C1E)
-val SocialPillLight = Color(0xFFF2F4F7)
-val SocialPeachGradientTop = Color(0xFFFBECE5)
-val SocialPeachGradientMid = Color(0xFFF8F1ED)
-val SocialPeachGradientBottom = Color(0xFFFFFFFF)
-val SocialAvatarRingCoral = Color(0xFFE8503A)
-val SocialSoftCardBg = Color(0xFFF5F6F8)
-val SocialSoftIconBg = Color(0xFFF0F2F5)
-val SocialToggleGreen = Color(0xFF34C759)
+val SocialBrandBlue = OmigramBrandIndigo
+val SocialPillDark = Color(0xFF19191D)
+val SocialPillLight = Color(0xFFF1F2F5)
+val SocialPeachGradientTop = Color(0xFFFFEEE7)
+val SocialPeachGradientMid = Color(0xFFFFF5F0)
+val SocialPeachGradientBottom = OmigramBackground
+val SocialAvatarRingCoral = OmigramBrandCoral
+val SocialSoftCardBg = Color(0xFFF7F7F9)
+val SocialSoftIconBg = Color(0xFFF1F2F5)
+val SocialToggleGreen = OmigramSuccessGreen
 
-// Chat Bubbles
-val SentBubbleBlue = Color(0xFF0095F6)
-val ReceivedBubbleGray = Color(0xFFEFEFEF)
-val SentBubbleText = Color(0xFFFFFFFF)
-val ReceivedBubbleText = Color(0xFF000000)
+val SentBubbleBlue = OmigramBrandIndigo
+val ReceivedBubbleGray = Color(0xFFF0F0F2)
+val SentBubbleText = Color.White
+val ReceivedBubbleText = OmigramPrimaryText
 
-// Online presence & Badges
-val OnlineGreen = Color(0xFF2ECC71)
-val UnreadBadgeBlue = Color(0xFF0095F6)
-val VerifiedBadgeBlue = Color(0xFF0095F6)
-val MissedCallRed = Color(0xFFED4956)
+val OnlineGreen = OmigramSuccessGreen
+val UnreadBadgeBlue = OmigramBrandIndigo
+val VerifiedBadgeBlue = OmigramBrandIndigo
+val MissedCallRed = OmigramErrorRed
 
-// Gradient for Story Ring (Instagram Style)
-val InstagramGradient = listOf(
-    Color(0xFFFBAA47),
-    Color(0xFFD91A46),
-    Color(0xFFA60F93)
-)
-
+val InstagramGradient = listOf(OmigramBrandCoral, Color(0xFFFFA45B), OmigramBrandIndigo)
 val StoryGradient = Brush.linearGradient(colors = InstagramGradient)
 
-// Legacy aliases for components
+// Legacy aliases retained for existing screens.
 val OmigoPrimaryLight = OmigramAccentBlue
-val OmigoOnPrimaryLight = Color(0xFFFFFFFF)
-val OmigoPrimaryContainerLight = Color(0xFFE0F2FE)
-val OmigoOnPrimaryContainerLight = Color(0xFF03354E)
-
+val OmigoOnPrimaryLight = Color.White
+val OmigoPrimaryContainerLight = Color(0xFFE9E9FF)
+val OmigoOnPrimaryContainerLight = Color(0xFF25255C)
 val OmigoSecondaryLight = OmigramSecondaryText
-val OmigoOnSecondaryLight = Color(0xFFFFFFFF)
+val OmigoOnSecondaryLight = Color.White
 val OmigoSecondaryContainerLight = OmigramSecondaryBackground
 val OmigoOnSecondaryContainerLight = OmigramPrimaryText
-
-val OmigoTertiaryLight = OmigramAccentBlue
-val OmigoOnTertiaryLight = Color(0xFFFFFFFF)
-val OmigoTertiaryContainerLight = Color(0xFFE0F2FE)
-val OmigoOnTertiaryContainerLight = Color(0xFF03354E)
-
+val OmigoTertiaryLight = OmigramBrandCoral
+val OmigoOnTertiaryLight = Color.White
+val OmigoTertiaryContainerLight = Color(0xFFFFE5E1)
+val OmigoOnTertiaryContainerLight = Color(0xFF5A1B14)
 val OmigoBackgroundLight = OmigramBackground
 val OmigoOnBackgroundLight = OmigramPrimaryText
 val OmigoSurfaceLight = OmigramBackground
@@ -69,7 +59,6 @@ val OmigoOnSurfaceLight = OmigramPrimaryText
 val OmigoSurfaceVariantLight = OmigramSecondaryBackground
 val OmigoOnSurfaceVariantLight = OmigramSecondaryText
 val OmigoOutlineLight = OmigramBorder
-
 val SentBubbleLight = SentBubbleBlue
 val ReceivedBubbleLight = ReceivedBubbleGray
 val ReadReceiptBlue = OmigramAccentBlue
