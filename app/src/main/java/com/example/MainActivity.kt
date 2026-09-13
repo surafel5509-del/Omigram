@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
 
     private fun handleSupabaseDeepLink(intent: Intent?) {
         if (intent == null || !SupabaseClientProvider.isConfigured) return
-        runCatching { SupabaseClientProvider.client.handleDeeplinks(intent) }
+        runCatching { handleDeeplinks<Unit>(intent) }
     }
 }
 
