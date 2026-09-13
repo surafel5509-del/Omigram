@@ -23,6 +23,9 @@ interface ProfileDao {
     @Query("SELECT * FROM profiles")
     fun getAllProfiles(): Flow<List<ProfileEntity>>
 
+    @Query("SELECT * FROM profiles")
+    suspend fun getProfilesList(): List<ProfileEntity>
+
     @Query("SELECT * FROM profiles WHERE username LIKE '%' || :query || '%' OR fullName LIKE '%' || :query || '%'")
     suspend fun searchProfiles(query: String): List<ProfileEntity>
 

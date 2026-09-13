@@ -47,6 +47,10 @@ import androidx.compose.ui.unit.sp
 import com.example.ui.theme.SocialBrandBlue
 import com.example.ui.theme.SocialPillDark
 
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.outlined.Notifications
+import com.example.ui.theme.OmigramOrange
+
 /** Shared floating navigation used across Omigram's social surfaces. */
 enum class SocialNavTab(
     val title: String,
@@ -55,8 +59,8 @@ enum class SocialNavTab(
     val testTag: String
 ) {
     HOME("Home", Icons.Filled.Home, Icons.Outlined.Home, "pill_tab_home"),
-    REELS("Explore", Icons.Filled.Explore, Icons.Outlined.Explore, "pill_tab_reels"),
-    NOTIFICATIONS("Likes", Icons.Filled.Favorite, Icons.Outlined.FavoriteBorder, "pill_tab_notifications"),
+    REELS("Reels", Icons.Filled.Explore, Icons.Outlined.Explore, "pill_tab_reels"),
+    NOTIFICATIONS("Alerts", Icons.Filled.Notifications, Icons.Outlined.Notifications, "pill_tab_notifications"),
     FRIENDS("Profile", Icons.Filled.Person, Icons.Outlined.Person, "pill_tab_friends"),
     SETTINGS("Settings", Icons.Filled.Settings, Icons.Outlined.Settings, "pill_tab_settings")
 }
@@ -67,8 +71,8 @@ fun FloatingPillNavBar(
     onTabSelected: (SocialNavTab) -> Unit,
     onActionButtonClick: () -> Unit,
     modifier: Modifier = Modifier,
-    actionButtonIcon: ImageVector = Icons.Filled.Search,
-    actionButtonColor: Color = SocialBrandBlue,
+    actionButtonIcon: ImageVector = Icons.Filled.Add,
+    actionButtonColor: Color = OmigramOrange,
     actionButtonTag: String = "pill_action_button"
 ) {
     val interactionSource = remember { MutableInteractionSource() }

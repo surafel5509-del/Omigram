@@ -33,37 +33,79 @@ import java.util.UUID
 class LocalAuthRepository(
     private val database: OmigoDatabase
 ) : AuthRepository {
-    private val _currentUser = MutableStateFlow<User?>(SampleData.currentUser)
+    private val _currentUser = MutableStateFlow<User?>(null)
     override val currentUser: Flow<User?> = _currentUser
 
     override suspend fun getCurrentUser(): User? {
-        return _currentUser.value ?: database.profileDao().getProfile(SampleData.CURRENT_USER_ID)?.toDomain()
+        return _currentUser.value
     }
 
     override suspend fun login(email: String, password: String): Result<User> {
-        delay(600) // Realistic network sensation
+        delay(500)
+        val cleanIdentifier = email.trim()
+        if (cleanIdentifier.isBlank()) {
+            return Result.failure(IllegalArgumentException("Please enter your email or username"))
+        }
         if (password.length < 6) {
             return Result.failure(IllegalArgumentException("Password must be at least 6 characters"))
         }
-        val user = database.profileDao().getProfile(SampleData.CURRENT_USER_ID)?.toDomain()
-            ?: SampleData.currentUser
-        _currentUser.value = user
-        return Result.success(user)
+
+        val allProfiles = database.profileDao().getProfilesList()
+        val matched = allProfiles.firstOrNull {
+            it.email.equals(cleanIdentifier, ignoreCase = true) ||
+            it.username.equals(cleanIdentifier.removePrefix("@"), ignoreCase = true)
+        }
+
+        if (matched != null) {
+            val user = matched.toDomain().copy(isOnline = true)
+            database.profileDao().insertProfile(user.toEntity())
+            _currentUser.value = user
+            return Result.success(user)
+        }
+
+        return Result.failure(IllegalArgumentException("No account found for '$cleanIdentifier'. Please register first."))
     }
 
     override suspend fun register(fullName: String, username: String, email: String, password: String): Result<User> {
-        delay(700)
-        if (username.isBlank() || fullName.isBlank() || email.isBlank()) {
+        delay(600)
+        val cleanName = fullName.trim()
+        val cleanUsername = username.trim().lowercase().removePrefix("@")
+        val cleanEmail = email.trim()
+
+        if (cleanName.isBlank() || cleanUsername.isBlank() || cleanEmail.isBlank()) {
             return Result.failure(IllegalArgumentException("All fields are required"))
         }
+        if (cleanUsername.length < 3) {
+            return Result.failure(IllegalArgumentException("Username must be at least 3 characters"))
+        }
+        if (!cleanEmail.contains("@") || !cleanEmail.contains(".")) {
+            return Result.failure(IllegalArgumentException("Please enter a valid email address"))
+        }
+        if (password.length < 6) {
+            return Result.failure(IllegalArgumentException("Password must be at least 6 characters"))
+        }
+
+        val allProfiles = database.profileDao().getProfilesList()
+        if (allProfiles.any { it.username.equals(cleanUsername, ignoreCase = true) }) {
+            return Result.failure(IllegalArgumentException("Username @$cleanUsername is already taken"))
+        }
+        if (allProfiles.any { it.email.equals(cleanEmail, ignoreCase = true) }) {
+            return Result.failure(IllegalArgumentException("An account with this email already exists"))
+        }
+
+        val userId = UUID.randomUUID().toString()
         val newUser = User(
-            id = SampleData.CURRENT_USER_ID,
-            username = username.trim().lowercase().removePrefix("@"),
-            fullName = fullName.trim(),
-            avatarUrl = SampleData.currentUser.avatarUrl,
-            email = email.trim(),
-            bio = "Hey there! I am using Omigo Chat.",
-            isOnline = true
+            id = userId,
+            username = cleanUsername,
+            fullName = cleanName,
+            avatarUrl = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300&auto=format&fit=crop&q=80",
+            email = cleanEmail,
+            bio = "Hey there! I am using Omigram.",
+            isOnline = true,
+            postsCount = 0,
+            followersCount = 0,
+            followingCount = 0,
+            joinedDate = "Just now"
         )
         database.profileDao().insertProfile(newUser.toEntity())
         _currentUser.value = newUser
@@ -72,11 +114,16 @@ class LocalAuthRepository(
 
     override suspend fun resetPassword(email: String): Result<Unit> {
         delay(500)
-        return if (email.contains("@")) {
-            Result.success(Unit)
-        } else {
-            Result.failure(IllegalArgumentException("Please enter a valid email address"))
+        val cleanEmail = email.trim()
+        if (!cleanEmail.contains("@")) {
+            return Result.failure(IllegalArgumentException("Please enter a valid email address"))
         }
+        val allProfiles = database.profileDao().getProfilesList()
+        val exists = allProfiles.any { it.email.equals(cleanEmail, ignoreCase = true) }
+        if (!exists) {
+            return Result.failure(IllegalArgumentException("No account registered with this email"))
+        }
+        return Result.success(Unit)
     }
 
     override suspend fun logout(): Result<Unit> {

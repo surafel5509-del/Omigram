@@ -71,6 +71,11 @@ import com.example.ui.theme.SocialPeachGradientBottom
 import com.example.ui.theme.SocialPeachGradientMid
 import com.example.ui.theme.SocialPeachGradientTop
 import com.example.ui.theme.SocialPillDark
+import com.example.ui.theme.appBackground
+import com.example.ui.theme.appBorder
+import com.example.ui.theme.appSurface
+import com.example.ui.theme.appTextPrimary
+import com.example.ui.theme.appTextSecondary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -278,36 +283,35 @@ fun ProfileScreen(
 
                         Spacer(modifier = Modifier.height(20.dp))
 
-                        // 4 Squircle Action Buttons: Message, Call, Video call, Settings
+                        // 4 Squircle Action Buttons for Own Profile: Edit Profile, Share, Saved, Settings
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             ProfileHeaderActionButton(
-                                icon = Icons.Filled.Message,
-                                label = "Message",
+                                icon = Icons.Filled.Edit,
+                                label = "Edit Profile",
+                                onClick = { isEditProfileSheetOpen = true },
+                                testTag = "action_btn_edit_profile"
+                            )
+
+                            ProfileHeaderActionButton(
+                                icon = Icons.Filled.Share,
+                                label = "Share",
                                 onClick = {
-                                    if (SampleData.sampleChats.isNotEmpty()) {
-                                        onNavigateToChat(SampleData.sampleChats.first().id)
-                                    } else {
-                                        Toast.makeText(context, "Opening direct messaging...", Toast.LENGTH_SHORT).show()
-                                    }
+                                    Toast.makeText(context, "Profile link copied to clipboard!", Toast.LENGTH_SHORT).show()
                                 },
-                                testTag = "action_btn_message"
+                                testTag = "action_btn_share"
                             )
 
                             ProfileHeaderActionButton(
-                                icon = Icons.Filled.Call,
-                                label = "Call",
-                                onClick = { onStartCall(false) },
-                                testTag = "action_btn_call"
-                            )
-
-                            ProfileHeaderActionButton(
-                                icon = Icons.Filled.Videocam,
-                                label = "Video call",
-                                onClick = { onStartCall(true) },
-                                testTag = "action_btn_video"
+                                icon = Icons.Filled.BookmarkBorder,
+                                label = "Saved",
+                                onClick = {
+                                    selectedTab = 2
+                                    Toast.makeText(context, "Showing saved posts & reels", Toast.LENGTH_SHORT).show()
+                                },
+                                testTag = "action_btn_saved"
                             )
 
                             ProfileHeaderActionButton(
@@ -328,8 +332,8 @@ fun ProfileScreen(
             // ==========================================
             Surface(
                 shape = RoundedCornerShape(28.dp),
-                color = Color.White,
-                border = BorderStroke(1.dp, Color(0xFFEBECEF)),
+                color = appSurface,
+                border = BorderStroke(1.dp, appBorder),
                 shadowElevation = 2.dp,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -344,14 +348,14 @@ fun ProfileScreen(
                         text = "bio",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF8E8E93),
+                        color = appTextSecondary,
                         letterSpacing = 0.5.sp
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = editBio,
                         fontSize = 14.sp,
-                        color = Color(0xFF1A1A1A),
+                        color = appTextPrimary,
                         lineHeight = 20.sp,
                         modifier = Modifier.testTag("profile_bio")
                     )

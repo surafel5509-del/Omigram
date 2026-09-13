@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
@@ -86,6 +87,7 @@ import com.example.ui.theme.OmigramAccentBlue
 import com.example.ui.theme.OmigramBackground
 import com.example.ui.theme.OmigramBorder
 import com.example.ui.theme.OmigramErrorRed
+import com.example.ui.theme.OmigramOrange
 import com.example.ui.theme.OmigramPrimaryText
 import com.example.ui.theme.OmigramSecondaryBackground
 import com.example.ui.theme.OmigramSecondaryText
@@ -99,7 +101,7 @@ import java.util.Locale
 fun ChatScreen(
     viewModel: ChatViewModel,
     onNavigateBack: () -> Unit,
-    onStartCall: (participant: User, isVideo: Boolean) -> Unit = { _, _ -> },
+    onStartCall: (participant: User, isVideo: Boolean, isGroup: Boolean, groupName: String) -> Unit = { _, _, _, _ -> },
     onNavigateToUserProfile: (userId: String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -133,8 +135,44 @@ fun ChatScreen(
             Column {
                 TopAppBar(
                     title = {
+                        val isGroup = chat?.isGroup == true
                         val participant = chat?.participant
-                        if (participant != null) {
+                        if (isGroup) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(38.dp)
+                                        .clip(CircleShape)
+                                        .background(OmigramOrange),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Groups,
+                                        contentDescription = "Group",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Column {
+                                    Text(
+                                        text = chat?.groupName ?: "Group Chat",
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = OmigramPrimaryText,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        text = "Group Call & Chat active",
+                                        fontSize = 11.sp,
+                                        color = OnlineGreen
+                                    )
+                                }
+                            }
+                        } else if (participant != null) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.clickable { onNavigateToUserProfile(participant.id) }
@@ -210,7 +248,10 @@ fun ChatScreen(
 
                         IconButton(
                             onClick = {
-                                if (participant != null) onStartCall(participant, false)
+                                val p = participant ?: SampleData.currentUser
+                                val isGroup = chat?.isGroup == true
+                                val gName = chat?.groupName ?: ""
+                                onStartCall(p, false, isGroup, gName)
                             },
                             modifier = Modifier.testTag("chat_voice_call_button")
                         ) {
@@ -223,7 +264,10 @@ fun ChatScreen(
 
                         IconButton(
                             onClick = {
-                                if (participant != null) onStartCall(participant, true)
+                                val p = participant ?: SampleData.currentUser
+                                val isGroup = chat?.isGroup == true
+                                val gName = chat?.groupName ?: ""
+                                onStartCall(p, true, isGroup, gName)
                             },
                             modifier = Modifier.testTag("chat_video_call_button")
                         ) {

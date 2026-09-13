@@ -21,7 +21,15 @@ sealed class Screen(val route: String) {
         fun createRoute(userId: String): String = "user_profile/$userId"
     }
 
-    object Call : Screen("call/{userId}/{isVideo}") {
-        fun createRoute(userId: String, isVideo: Boolean): String = "call/$userId/$isVideo"
+    object Call : Screen("call/{userId}/{isVideo}?isGroup={isGroup}&groupName={groupName}") {
+        fun createRoute(
+            userId: String,
+            isVideo: Boolean,
+            isGroup: Boolean = false,
+            groupName: String = ""
+        ): String {
+            val encodedName = java.net.URLEncoder.encode(groupName, "UTF-8")
+            return "call/$userId/$isVideo?isGroup=$isGroup&groupName=$encodedName"
+        }
     }
 }

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -61,12 +62,27 @@ import com.example.presentation.common.DmProIcon
 import com.example.ui.theme.OmigramAccentBlue
 import com.example.ui.theme.OmigramErrorRed
 
+import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.runtime.mutableStateListOf
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import com.example.presentation.create.CreateScreen
+import com.example.ui.theme.OmigramOrange
+
+import com.example.presentation.common.ShareWithFriendsDialog
+
 @Composable
 fun ReelsScreen(
     onNavigateToUserProfile: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    val reels = SampleData.sampleReels
+    val context = LocalContext.current
+    val reels = remember { mutableStateListOf(*SampleData.sampleReels.toTypedArray()) }
+    var isCreateOpen by remember { mutableStateOf(false) }
+    var sharingReel by remember { mutableStateOf<Reel?>(null) }
     val pagerState = rememberPagerState(pageCount = { reels.size })
 
     Box(
@@ -75,18 +91,40 @@ fun ReelsScreen(
             .background(Color.Black)
             .testTag("reels_screen")
     ) {
-        VerticalPager(
-            state = pagerState,
-            modifier = Modifier.fillMaxSize()
-        ) { page ->
-            val reel = reels[page]
-            ReelPlayerItem(
-                reel = reel,
-                onUserClick = { onNavigateToUserProfile(reel.creator.id) }
-            )
+        if (reels.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("No reels yet", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(12.dp))
+                    Button(
+                        onClick = { isCreateOpen = true },
+                        colors = ButtonDefaults.buttonColors(containerColor = OmigramOrange)
+                    ) {
+                        Text("Create Reel", color = Color.White)
+                    }
+                }
+            }
+        } else {
+            VerticalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { page ->
+                val reel = reels.getOrNull(page)
+                if (reel != null) {
+                    ReelPlayerItem(
+                        reel = reel,
+                        onUserClick = { onNavigateToUserProfile(reel.creator.id) },
+                        onShareClick = { sharingReel = reel },
+                        onDeleteReel = {
+                            reels.remove(reel)
+                            Toast.makeText(context, "Reel deleted", Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                }
+            }
         }
 
-        // Top Bar: "Reels" + Camera icon
+        // Top Bar: "Reels" + Camera / Upload Reel button
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -102,27 +140,58 @@ fun ReelsScreen(
                 color = Color.White
             )
 
-            IconButton(onClick = { /* camera */ }) {
+            IconButton(
+                onClick = { isCreateOpen = true },
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(Color.Black.copy(alpha = 0.4f))
+            ) {
                 Icon(
                     imageVector = Icons.Default.CameraAlt,
-                    contentDescription = "Camera",
-                    tint = Color.White,
+                    contentDescription = "Upload Reel",
+                    tint = OmigramOrange,
                     modifier = Modifier.size(24.dp)
                 )
             }
         }
+    }
+
+    if (sharingReel != null) {
+        val r = sharingReel!!
+        ShareWithFriendsDialog(
+            title = "Share Reel",
+            contentPreview = "🎥 Reel by @${r.creator.username}: ${r.caption}",
+            onDismiss = { sharingReel = null }
+        )
+    }
+
+    if (isCreateOpen) {
+        CreateScreen(
+            onDismiss = { isCreateOpen = false },
+            onPostCreated = { isCreateOpen = false },
+            onStoryCreated = { isCreateOpen = false },
+            onReelCreated = { newReel ->
+                reels.add(0, newReel)
+                isCreateOpen = false
+                Toast.makeText(context, "Reel created successfully!", Toast.LENGTH_SHORT).show()
+            }
+        )
     }
 }
 
 @Composable
 private fun ReelPlayerItem(
     reel: Reel,
-    onUserClick: () -> Unit
+    onUserClick: () -> Unit,
+    onShareClick: () -> Unit,
+    onDeleteReel: () -> Unit = {}
 ) {
+    val isCurrentUser = reel.creator.id == SampleData.CURRENT_USER_ID
     var isLiked by remember { mutableStateOf(reel.isLiked) }
     var likesCount by remember { mutableStateOf(reel.likesCount) }
     var isFollowing by remember { mutableStateOf(false) }
     var isPaused by remember { mutableStateOf(false) }
+    var showMenu by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -148,7 +217,61 @@ private fun ReelPlayerItem(
             modifier = Modifier.fillMaxSize()
         )
 
-        // Subtle gradient overlay for readability
+        // Top information banner: Creator Profile ONLY (No Sound/Audio Track)
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(top = 80.dp, start = 16.dp, end = 16.dp)
+                .clip(RoundedCornerShape(22.dp))
+                .background(Color.Black.copy(alpha = 0.55f))
+                .padding(horizontal = 12.dp, vertical = 6.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                AsyncImage(
+                    model = reel.creator.avatarUrl,
+                    contentDescription = reel.creator.fullName,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .border(1.5.dp, OmigramOrange, CircleShape)
+                        .clickable { onUserClick() }
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "@${reel.creator.username}",
+                    fontSize = 13.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    modifier = Modifier.clickable { onUserClick() }
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                if (isFollowing) {
+                    OutlinedButton(
+                        onClick = { isFollowing = false },
+                        shape = RoundedCornerShape(12.dp),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                        modifier = Modifier.height(26.dp)
+                    ) {
+                        Text("Following", fontSize = 11.sp, color = Color.White)
+                    }
+                } else {
+                    Button(
+                        onClick = { isFollowing = true },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = OmigramOrange),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 0.dp),
+                        modifier = Modifier.height(26.dp)
+                    ) {
+                        Text("Follow", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    }
+                }
+            }
+        }
+
+        // Gradient overlay
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -240,7 +363,7 @@ private fun ReelPlayerItem(
             // Share
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.clickable { /* share */ }
+                modifier = Modifier.clickable { onShareClick() }
             ) {
                 DmProIcon(
                     tint = Color.White,
@@ -256,13 +379,50 @@ private fun ReelPlayerItem(
             }
 
             // Overflow 3-dots
-            IconButton(onClick = { /* more */ }) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = "More",
-                    tint = Color.White,
-                    modifier = Modifier.size(24.dp)
-                )
+            Box {
+                IconButton(onClick = { showMenu = true }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "More",
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
+                ) {
+                    if (isCurrentUser) {
+                        DropdownMenuItem(
+                            text = { Text("Delete Reel", color = OmigramErrorRed, fontWeight = FontWeight.Bold) },
+                            leadingIcon = {
+                                Icon(Icons.Default.DeleteOutline, contentDescription = null, tint = OmigramErrorRed)
+                            },
+                            onClick = {
+                                showMenu = false
+                                onDeleteReel()
+                            }
+                        )
+                    }
+                    DropdownMenuItem(
+                        text = { Text("Bookmark") },
+                        leadingIcon = {
+                            Icon(Icons.Default.BookmarkBorder, contentDescription = null)
+                        },
+                        onClick = { showMenu = false }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Share to Chat") },
+                        leadingIcon = {
+                            Icon(Icons.Default.Share, contentDescription = null)
+                        },
+                        onClick = {
+                            showMenu = false
+                            onShareClick()
+                        }
+                    )
+                }
             }
 
             // Audio track disk
@@ -282,65 +442,17 @@ private fun ReelPlayerItem(
             }
         }
 
-        // Bottom left creator info and audio line
+        // Bottom left caption and audio line (Creator profile removed from bottom)
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(start = 16.dp, end = 76.dp, bottom = 28.dp)
         ) {
-            // Creator Row
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                AsyncImage(
-                    model = reel.creator.avatarUrl,
-                    contentDescription = reel.creator.fullName,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .border(1.dp, Color.White, CircleShape)
-                        .clickable { onUserClick() }
-                )
-                Spacer(modifier = Modifier.width(10.dp))
-                Text(
-                    text = reel.creator.username,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    modifier = Modifier.clickable { onUserClick() }
-                )
-                Spacer(modifier = Modifier.width(10.dp))
-
-                // Follow button
-                if (isFollowing) {
-                    OutlinedButton(
-                        onClick = { isFollowing = false },
-                        shape = RoundedCornerShape(8.dp),
-                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 0.dp),
-                        modifier = Modifier.height(28.dp)
-                    ) {
-                        Text("Following", fontSize = 11.sp, color = Color.White)
-                    }
-                } else {
-                    Button(
-                        onClick = { isFollowing = true },
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = OmigramAccentBlue),
-                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 0.dp),
-                        modifier = Modifier.height(28.dp)
-                    ) {
-                        Text("Follow", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
             // Caption
             Text(
                 text = reel.caption,
-                fontSize = 13.sp,
+                fontSize = 13.5.sp,
+                fontWeight = FontWeight.Medium,
                 color = Color.White,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,

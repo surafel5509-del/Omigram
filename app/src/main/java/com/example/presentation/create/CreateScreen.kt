@@ -77,7 +77,7 @@ import com.example.core.model.Reel
 import com.example.core.model.Story
 import com.example.core.model.User
 import com.example.data.local.SampleData
-import com.example.ui.theme.SocialBrandBlue
+import com.example.ui.theme.OmigramOrange
 import com.example.ui.theme.SocialPeachGradientBottom
 import com.example.ui.theme.SocialPeachGradientMid
 import com.example.ui.theme.SocialPeachGradientTop
@@ -216,7 +216,7 @@ fun CreateScreen(
                         Icon(
                             imageVector = Icons.Default.AutoAwesome,
                             contentDescription = null,
-                            tint = SocialBrandBlue,
+                            tint = OmigramOrange,
                             modifier = Modifier.size(14.dp)
                         )
                         Spacer(Modifier.width(4.dp))
@@ -297,7 +297,7 @@ fun CreateScreen(
                             Icon(
                                 imageVector = Icons.Default.VideoLibrary,
                                 contentDescription = "Pick Media",
-                                tint = SocialBrandBlue,
+                                tint = OmigramOrange,
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(Modifier.width(6.dp))
@@ -337,13 +337,13 @@ fun CreateScreen(
                         Surface(
                             modifier = Modifier.size(38.dp),
                             shape = CircleShape,
-                            color = SocialBrandBlue.copy(alpha = 0.12f)
+                            color = OmigramOrange.copy(alpha = 0.12f)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     imageVector = Icons.Default.Image,
                                     contentDescription = "From Phone",
-                                    tint = SocialBrandBlue,
+                                    tint = OmigramOrange,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -368,7 +368,7 @@ fun CreateScreen(
                         text = "Browse",
                         fontSize = 12.5.sp,
                         fontWeight = FontWeight.Bold,
-                        color = SocialBrandBlue
+                        color = OmigramOrange
                     )
                 }
             }
@@ -403,7 +403,7 @@ fun CreateScreen(
                             }
                             .border(
                                 width = if (isSelected) 2.5.dp else 1.dp,
-                                color = if (isSelected) SocialBrandBlue else Color(0xFFEBECEF),
+                                color = if (isSelected) OmigramOrange else Color(0xFFEBECEF),
                                 shape = RoundedCornerShape(16.dp)
                             )
                     ) {
@@ -542,7 +542,7 @@ fun CreateScreen(
                                     text = tag,
                                     fontSize = 11.5.sp,
                                     fontWeight = FontWeight.Medium,
-                                    color = SocialBrandBlue,
+                                    color = OmigramOrange,
                                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                                 )
                             }
@@ -709,7 +709,7 @@ fun CreateScreen(
                     },
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = SocialPillDark
+                        containerColor = OmigramOrange
                     ),
                     modifier = Modifier
                         .weight(1.2f)
@@ -767,7 +767,7 @@ fun CreateScreen(
                     icon = Icons.Default.ViewDay,
                     title = "Home Feed Post",
                     subtitle = "Publish to main feed for all followers to view & like",
-                    accentColor = SocialBrandBlue,
+                    accentColor = OmigramOrange,
                     onClick = {
                         showDestinationPicker = false
                         val mediaString = selectedMediaUri?.toString() ?: selectedPresetImage

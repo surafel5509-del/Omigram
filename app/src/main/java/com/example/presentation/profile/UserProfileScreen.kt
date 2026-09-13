@@ -70,13 +70,14 @@ fun UserProfileScreen(
     userId: String,
     onNavigateBack: () -> Unit,
     onNavigateToChat: (String) -> Unit = {},
+    onStartCall: (user: com.example.core.model.User, isVideo: Boolean) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val user = SampleData.sampleUsers.find { it.id == userId } ?: SampleData.userJennifer
+    val isOwnProfile = user.id == SampleData.CURRENT_USER_ID
 
     var isPrivateMode by remember { mutableStateOf(false) }
-    var activeCallType by remember { mutableStateOf<String?>(null) }
 
     val userPhotos = listOf(
         "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=400&auto=format&fit=crop&q=80",
@@ -307,51 +308,96 @@ fun UserProfileScreen(
 
                         Spacer(modifier = Modifier.height(24.dp))
 
-                        // Screenshot 2: 4 Squircle Action Buttons in a horizontal row
+                        // Action buttons: conditionally hide Message & Call if own profile
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            // Button 1: Message
-                            SquircleActionButton(
-                                icon = Icons.Outlined.ChatBubbleOutline,
-                                label = "Message",
-                                onClick = {
-                                    val chat = SampleData.sampleChats.find { it.participant.id == user.id }
-                                    if (chat != null) onNavigateToChat(chat.id)
-                                    else if (SampleData.sampleChats.isNotEmpty()) onNavigateToChat(SampleData.sampleChats.first().id)
-                                },
-                                testTag = "action_btn_message"
-                            )
+                            if (isOwnProfile) {
+                                // Owner Button 1: Edit Profile
+                                SquircleActionButton(
+                                    icon = Icons.Filled.Bookmark,
+                                    label = "Saved",
+                                    onClick = {
+                                        Toast.makeText(context, "Opening saved items...", Toast.LENGTH_SHORT).show()
+                                    },
+                                    testTag = "action_btn_saved"
+                                )
 
-                            // Button 2: Call
-                            SquircleActionButton(
-                                icon = Icons.Filled.Call,
-                                label = "Call",
-                                onClick = { activeCallType = "Voice Call" },
-                                testTag = "action_btn_call"
-                            )
+                                // Owner Button 2: Share Profile
+                                SquircleActionButton(
+                                    icon = Icons.Outlined.Share,
+                                    label = "Share",
+                                    onClick = {
+                                        Toast.makeText(context, "Profile link copied to clipboard!", Toast.LENGTH_SHORT).show()
+                                    },
+                                    testTag = "action_btn_share"
+                                )
 
-                            // Button 3: Video call
-                            SquircleActionButton(
-                                icon = Icons.Filled.Videocam,
-                                label = "Video call",
-                                onClick = { activeCallType = "Video Call" },
-                                testTag = "action_btn_video"
-                            )
+                                // Owner Button 3: Secured
+                                SquircleActionButton(
+                                    icon = Icons.Filled.Lock,
+                                    label = if (isPrivateMode) "Secured" else "Private",
+                                    onClick = {
+                                        isPrivateMode = !isPrivateMode
+                                        val status = if (isPrivateMode) "Private account active" else "Public account active"
+                                        Toast.makeText(context, status, Toast.LENGTH_SHORT).show()
+                                    },
+                                    iconTint = if (isPrivateMode) Color(0xFF34C759) else Color(0xFF1A1A1A),
+                                    testTag = "action_btn_private"
+                                )
 
-                            // Button 4: Private
-                            SquircleActionButton(
-                                icon = Icons.Filled.Lock,
-                                label = if (isPrivateMode) "Secured" else "Private",
-                                onClick = {
-                                    isPrivateMode = !isPrivateMode
-                                    val status = if (isPrivateMode) "Private mode enabled" else "Private mode disabled"
-                                    Toast.makeText(context, status, Toast.LENGTH_SHORT).show()
-                                },
-                                iconTint = if (isPrivateMode) Color(0xFF34C759) else Color(0xFF1A1A1A),
-                                testTag = "action_btn_private"
-                            )
+                                // Owner Button 4: Link
+                                SquircleActionButton(
+                                    icon = Icons.Outlined.Link,
+                                    label = "Link",
+                                    onClick = {
+                                        Toast.makeText(context, "Profile link copied!", Toast.LENGTH_SHORT).show()
+                                    },
+                                    testTag = "action_btn_link"
+                                )
+                            } else {
+                                // Peer Button 1: Message
+                                SquircleActionButton(
+                                    icon = Icons.Outlined.ChatBubbleOutline,
+                                    label = "Message",
+                                    onClick = {
+                                        val chat = SampleData.sampleChats.find { it.participant.id == user.id }
+                                        if (chat != null) onNavigateToChat(chat.id)
+                                        else if (SampleData.sampleChats.isNotEmpty()) onNavigateToChat(SampleData.sampleChats.first().id)
+                                    },
+                                    testTag = "action_btn_message"
+                                )
+
+                                // Peer Button 2: Call
+                                SquircleActionButton(
+                                    icon = Icons.Filled.Call,
+                                    label = "Call",
+                                    onClick = { onStartCall(user, false) },
+                                    testTag = "action_btn_call"
+                                )
+
+                                // Peer Button 3: Video call
+                                SquircleActionButton(
+                                    icon = Icons.Filled.Videocam,
+                                    label = "Video call",
+                                    onClick = { onStartCall(user, true) },
+                                    testTag = "action_btn_video"
+                                )
+
+                                // Peer Button 4: Private / Lock
+                                SquircleActionButton(
+                                    icon = Icons.Filled.Lock,
+                                    label = if (isPrivateMode) "Secured" else "Private",
+                                    onClick = {
+                                        isPrivateMode = !isPrivateMode
+                                        val status = if (isPrivateMode) "Private mode enabled" else "Private mode disabled"
+                                        Toast.makeText(context, status, Toast.LENGTH_SHORT).show()
+                                    },
+                                    iconTint = if (isPrivateMode) Color(0xFF34C759) else Color(0xFF1A1A1A),
+                                    testTag = "action_btn_private"
+                                )
+                            }
                         }
 
                         Spacer(modifier = Modifier.height(20.dp))
@@ -475,32 +521,6 @@ fun UserProfileScreen(
 
             Spacer(modifier = Modifier.height(40.dp))
         }
-    }
-
-    // Call Dialog
-    if (activeCallType != null) {
-        AlertDialog(
-            onDismissRequest = { activeCallType = null },
-            title = {
-                Text("$activeCallType with ${user.fullName}")
-            },
-            text = {
-                Text("Calling ${user.fullName}... (High Definition End-to-End Encrypted)")
-            },
-            confirmButton = {
-                Button(
-                    onClick = { activeCallType = null },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFED4956))
-                ) {
-                    Text("End Call", color = Color.White)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { activeCallType = null }) {
-                    Text("Minimize")
-                }
-            }
-        )
     }
 }
 

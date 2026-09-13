@@ -13,6 +13,7 @@ import com.example.presentation.auth.AuthViewModel
 import com.example.presentation.auth.ForgotPasswordScreen
 import com.example.presentation.auth.LoginScreen
 import com.example.presentation.auth.RegisterScreen
+import com.example.presentation.call.CallScreen
 import com.example.presentation.chat.ChatScreen
 import com.example.presentation.chat.ChatViewModel
 import com.example.presentation.home.HomeScreen
@@ -191,6 +192,19 @@ fun OmigoNavGraph(
                 viewModel = chatViewModel,
                 onNavigateBack = {
                     navController.popBackStack()
+                },
+                onStartCall = { user, isVideo, isGroup, groupName ->
+                    navController.navigate(
+                        Screen.Call.createRoute(
+                            userId = user.id,
+                            isVideo = isVideo,
+                            isGroup = isGroup,
+                            groupName = groupName
+                        )
+                    )
+                },
+                onNavigateToUserProfile = { userId ->
+                    navController.navigate(Screen.UserProfile.createRoute(userId))
                 }
             )
         }
@@ -226,6 +240,52 @@ fun OmigoNavGraph(
                 },
                 onNavigateToChat = { chatId ->
                     navController.navigate(Screen.ChatDetail.createRoute(chatId))
+                },
+                onStartCall = { user, isVideo ->
+                    navController.navigate(
+                        Screen.Call.createRoute(
+                            userId = user.id,
+                            isVideo = isVideo,
+                            isGroup = false,
+                            groupName = ""
+                        )
+                    )
+                }
+            )
+        }
+
+        composable(
+            route = Screen.Call.route,
+            arguments = listOf(
+                navArgument("userId") { type = NavType.StringType },
+                navArgument("isVideo") { type = NavType.BoolType },
+                navArgument("isGroup") {
+                    type = NavType.BoolType
+                    defaultValue = false
+                },
+                navArgument("groupName") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                }
+            )
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: ""
+            val isVideo = backStackEntry.arguments?.getBoolean("isVideo") ?: false
+            val isGroup = backStackEntry.arguments?.getBoolean("isGroup") ?: false
+            val rawGroupName = backStackEntry.arguments?.getString("groupName") ?: ""
+            val groupName = try {
+                java.net.URLDecoder.decode(rawGroupName, "UTF-8")
+            } catch (e: Exception) {
+                rawGroupName
+            }
+
+            CallScreen(
+                userId = userId,
+                isVideoCall = isVideo,
+                isGroupCall = isGroup,
+                groupName = groupName,
+                onEndCall = {
+                    navController.popBackStack()
                 }
             )
         }

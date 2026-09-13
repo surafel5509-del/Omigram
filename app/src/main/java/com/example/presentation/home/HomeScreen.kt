@@ -69,6 +69,13 @@ import com.example.ui.theme.OmigramSecondaryText
 import com.example.ui.theme.SocialBrandBlue
 import com.example.ui.theme.SocialSoftIconBg
 
+import com.example.presentation.common.ShareWithFriendsDialog
+import com.example.ui.theme.appBackground
+import com.example.ui.theme.appBorder
+import com.example.ui.theme.appSurface
+import com.example.ui.theme.appTextPrimary
+import com.example.ui.theme.appTextSecondary
+
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
@@ -88,6 +95,7 @@ fun HomeScreen(
 
     var viewingStoryIndex by remember { mutableStateOf<Int?>(null) }
     var activePostForComments by remember { mutableStateOf<Post?>(null) }
+    var sharingPost by remember { mutableStateOf<Post?>(null) }
     var isCreatePostOpen by remember { mutableStateOf(false) }
 
     val currentPillTab = when (uiState.selectedTab) {
@@ -99,14 +107,14 @@ fun HomeScreen(
     val unread = chats.sumOf { it.unreadCount }
 
     Scaffold(
-        modifier = modifier.fillMaxSize().background(OmigramBackground).testTag("home_screen"),
-        containerColor = OmigramBackground,
+        modifier = modifier.fillMaxSize().background(appBackground).testTag("home_screen"),
+        containerColor = appBackground,
         topBar = {
             if (uiState.selectedTab == OmigramTab.HOME) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(OmigramBackground)
+                        .background(appBackground)
                         .padding(horizontal = 18.dp, vertical = 12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
@@ -114,22 +122,30 @@ fun HomeScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
-                                .size(34.dp)
-                                .clip(RoundedCornerShape(11.dp))
-                                .background(SocialBrandBlue),
+                                .size(36.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(com.example.ui.theme.OmigramOrange),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("O", color = Color.White, fontSize = 19.sp, fontWeight = FontWeight.Black)
+                            Text("O", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Black)
                         }
-                        Spacer(Modifier.width(9.dp))
-                        Text(
-                            text = "Omigram",
-                            color = OmigramPrimaryText,
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = (-0.7).sp,
-                            modifier = Modifier.testTag("home_brand_logo")
-                        )
+                        Spacer(Modifier.width(8.dp))
+                        Row(modifier = Modifier.testTag("home_brand_logo")) {
+                            Text(
+                                text = "Omi",
+                                color = com.example.ui.theme.OmigramOrange,
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = (-0.5).sp
+                            )
+                            Text(
+                                text = "gram",
+                                color = appTextPrimary,
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = (-0.5).sp
+                            )
+                        }
                     }
 
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -145,18 +161,18 @@ fun HomeScreen(
                                 .clip(CircleShape)
                                 .clickable(onClick = onNavigateToMessages)
                                 .testTag("top_bar_messages_button"),
-                            color = SocialSoftIconBg,
+                            color = appBorder.copy(alpha = 0.2f),
                             shape = CircleShape
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 BadgedBox(
                                     badge = {
                                         if (unread > 0) {
-                                            Badge(containerColor = SocialBrandBlue) { Text(unread.coerceAtMost(99).toString()) }
+                                            Badge(containerColor = com.example.ui.theme.OmigramOrange) { Text(unread.coerceAtMost(99).toString()) }
                                         }
                                     }
                                 ) {
-                                    DmProIcon(tint = OmigramPrimaryText, modifier = Modifier.size(21.dp))
+                                    DmProIcon(tint = appTextPrimary, modifier = Modifier.size(21.dp))
                                 }
                             }
                         }
@@ -164,10 +180,10 @@ fun HomeScreen(
                             modifier = Modifier
                                 .size(42.dp)
                                 .clip(CircleShape)
-                                .border(1.dp, OmigramBorder, CircleShape)
+                                .border(1.dp, appBorder, CircleShape)
                                 .clickable { viewModel.selectTab(OmigramTab.PROFILE) }
                                 .testTag("top_bar_profile_avatar_button"),
-                            color = SocialSoftIconBg,
+                            color = appBorder.copy(alpha = 0.2f),
                             shape = CircleShape
                         ) {
                             AsyncImage(
@@ -195,22 +211,23 @@ fun HomeScreen(
                 },
                 onActionButtonClick = { isCreatePostOpen = true },
                 actionButtonIcon = Icons.Default.Add,
-                actionButtonColor = SocialBrandBlue,
+                actionButtonColor = com.example.ui.theme.OmigramOrange,
                 actionButtonTag = "floating_add_post_button"
             )
         }
     ) { padding ->
         Box(
-            modifier = Modifier.fillMaxSize().padding(padding).background(OmigramBackground)
+            modifier = Modifier.fillMaxSize().padding(padding).background(appBackground)
         ) {
             when (uiState.selectedTab) {
                 OmigramTab.HOME -> FeedTabContent(
                     stories = stories,
                     posts = posts,
                     onStoryClick = { viewingStoryIndex = it },
+                    onAddStoryClick = { isCreatePostOpen = true },
                     onLikeToggle = viewModel::toggleLikePost,
                     onCommentClick = { activePostForComments = it },
-                    onShareClick = { onNavigateToMessages() },
+                    onShareClick = { sharingPost = it },
                     onSaveToggle = viewModel::toggleSavePost,
                     onUserClick = { onNavigateToUserProfile(it) }
                 )
@@ -229,6 +246,15 @@ fun HomeScreen(
                 )
             }
         }
+    }
+
+    if (sharingPost != null) {
+        val p = sharingPost!!
+        ShareWithFriendsDialog(
+            title = "Share Post",
+            contentPreview = "📷 Post by @${p.author.username}: ${p.caption.take(80)}",
+            onDismiss = { sharingPost = null }
+        )
     }
 
     if (isCreatePostOpen) {
@@ -270,6 +296,7 @@ private fun FeedTabContent(
     stories: List<Story>,
     posts: List<Post>,
     onStoryClick: (Int) -> Unit,
+    onAddStoryClick: () -> Unit,
     onLikeToggle: (String) -> Unit,
     onCommentClick: (Post) -> Unit,
     onShareClick: (Post) -> Unit,
@@ -280,7 +307,7 @@ private fun FeedTabContent(
         modifier = Modifier.fillMaxSize().testTag("feed_list"),
         contentPadding = PaddingValues(bottom = 18.dp)
     ) {
-        item { StoriesTray(stories, onStoryClick) }
+        item { StoriesTray(stories, onStoryClick, onAddStoryClick) }
         items(posts, key = { it.id }) { post ->
             PostItemCard(
                 post = post,
@@ -296,7 +323,11 @@ private fun FeedTabContent(
 }
 
 @Composable
-private fun StoriesTray(stories: List<Story>, onStoryClick: (Int) -> Unit) {
+private fun StoriesTray(
+    stories: List<Story>,
+    onStoryClick: (Int) -> Unit,
+    onAddStoryClick: () -> Unit
+) {
     LazyRow(
         modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp).testTag("stories_tray"),
         contentPadding = PaddingValues(horizontal = 14.dp),
@@ -304,18 +335,33 @@ private fun StoriesTray(stories: List<Story>, onStoryClick: (Int) -> Unit) {
     ) {
         item {
             Column(
-                modifier = Modifier.width(104.dp).height(160.dp).clip(RoundedCornerShape(18.dp))
-                    .background(Color(0xFFEDEEFF)).clickable { if (stories.isNotEmpty()) onStoryClick(0) }
+                modifier = Modifier
+                    .width(104.dp)
+                    .height(160.dp)
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(Color(0xFFFFF4EE))
+                    .border(1.5.dp, com.example.ui.theme.OmigramOrange.copy(alpha = 0.5f), RoundedCornerShape(18.dp))
+                    .clickable { onAddStoryClick() }
                     .testTag("add_story_card"),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 Box(
-                    modifier = Modifier.size(42.dp).clip(CircleShape).background(SocialBrandBlue),
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .background(com.example.ui.theme.OmigramOrange),
                     contentAlignment = Alignment.Center
-                ) { Icon(Icons.Default.Add, "Add story", tint = Color.White) }
-                Spacer(Modifier.height(9.dp))
-                Text("Add story", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = SocialBrandBlue)
+                ) {
+                    Icon(Icons.Default.Add, "Add history", tint = Color.White, modifier = Modifier.size(24.dp))
+                }
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "Add history",
+                    fontSize = 12.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = com.example.ui.theme.OmigramOrange
+                )
             }
         }
         itemsIndexed(stories) { index, story ->

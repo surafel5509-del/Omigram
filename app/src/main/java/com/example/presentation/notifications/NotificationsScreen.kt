@@ -54,11 +54,11 @@ import com.example.core.model.SocialNotification
 import com.example.core.model.SocialNotificationType
 import com.example.data.local.SampleData
 import com.example.ui.theme.OmigramAccentBlue
-import com.example.ui.theme.OmigramBackground
-import com.example.ui.theme.OmigramBorder
-import com.example.ui.theme.OmigramPrimaryText
-import com.example.ui.theme.OmigramSecondaryBackground
-import com.example.ui.theme.OmigramSecondaryText
+import com.example.ui.theme.appBackground
+import com.example.ui.theme.appBorder
+import com.example.ui.theme.appSurface
+import com.example.ui.theme.appTextPrimary
+import com.example.ui.theme.appTextSecondary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,7 +73,7 @@ fun NotificationsScreen(
     Scaffold(
         modifier = modifier
             .fillMaxSize()
-            .background(OmigramBackground)
+            .background(appBackground)
             .testTag("notifications_screen"),
         topBar = {
             TopAppBar(
@@ -82,7 +82,7 @@ fun NotificationsScreen(
                         text = "Notifications",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = OmigramPrimaryText
+                        color = appTextPrimary
                     )
                 },
                 navigationIcon = {
@@ -93,11 +93,15 @@ fun NotificationsScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = OmigramPrimaryText
+                            tint = appTextPrimary
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = OmigramBackground)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = appBackground,
+                    titleContentColor = appTextPrimary,
+                    navigationIconContentColor = appTextPrimary
+                )
             )
         }
     ) { innerPadding ->
@@ -105,7 +109,7 @@ fun NotificationsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(OmigramBackground)
+                .background(appBackground)
                 .testTag("notifications_list")
         ) {
             val todayList = notifications.take(3)
@@ -172,7 +176,7 @@ private fun NotificationSectionTitle(title: String) {
         text = title,
         fontSize = 15.sp,
         fontWeight = FontWeight.Bold,
-        color = OmigramPrimaryText,
+        color = appTextPrimary,
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
     )
 }
@@ -199,14 +203,14 @@ private fun NotificationRow(
             modifier = Modifier
                 .size(44.dp)
                 .clip(CircleShape)
-                .border(1.dp, OmigramBorder, CircleShape)
+                .border(1.dp, appBorder, CircleShape)
         )
 
         Spacer(modifier = Modifier.width(12.dp))
 
         // Text notification description
         val annotatedText = buildAnnotatedString {
-            withStyle(SpanStyle(fontWeight = FontWeight.Bold, color = OmigramPrimaryText)) {
+            withStyle(SpanStyle(fontWeight = FontWeight.Bold, color = appTextPrimary)) {
                 append(item.actor.username)
             }
             append(" ")
@@ -218,7 +222,7 @@ private fun NotificationRow(
                 }
             )
             append(" ")
-            withStyle(SpanStyle(color = OmigramSecondaryText, fontSize = 12.sp)) {
+            withStyle(SpanStyle(color = appTextSecondary, fontSize = 12.sp)) {
                 append(item.timeAgo)
             }
         }
@@ -227,6 +231,7 @@ private fun NotificationRow(
             text = annotatedText,
             fontSize = 13.sp,
             lineHeight = 17.sp,
+            color = appTextPrimary,
             modifier = Modifier.weight(1f)
         )
 
@@ -238,7 +243,7 @@ private fun NotificationRow(
                 OutlinedButton(
                     onClick = onFollowToggle,
                     shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = OmigramPrimaryText),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = appTextPrimary),
                     modifier = Modifier
                         .height(32.dp)
                         .testTag("notification_following_${item.actor.id}")
@@ -265,7 +270,7 @@ private fun NotificationRow(
                 modifier = Modifier
                     .size(44.dp)
                     .clip(RoundedCornerShape(6.dp))
-                    .border(0.5.dp, OmigramBorder, RoundedCornerShape(6.dp))
+                    .border(0.5.dp, appBorder, RoundedCornerShape(6.dp))
             )
         }
     }

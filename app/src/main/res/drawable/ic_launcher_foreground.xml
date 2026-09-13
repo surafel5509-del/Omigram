@@ -3,7 +3,7 @@
     <item
         android:width="72dp"
         android:height="72dp"
-        android:drawable="@drawable/omigram_app_icon_1789298265546"
+        android:drawable="@drawable/omigram_logo_icon_1789306111553"
         android:gravity="center" />
 </layer-list>
 
