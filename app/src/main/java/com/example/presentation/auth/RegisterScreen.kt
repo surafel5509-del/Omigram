@@ -68,7 +68,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import coil.compose.AsyncImage
+import com.example.data.remote.supabase.SupabaseClientProvider
 import com.example.presentation.common.OmigramLogo
 import com.example.ui.theme.OmigramAccentBlue
 import com.example.ui.theme.OmigramBackground
@@ -78,6 +81,11 @@ import com.example.ui.theme.OmigramPrimaryText
 import com.example.ui.theme.OmigramSecondaryBackground
 import com.example.ui.theme.OmigramSecondaryText
 import com.example.ui.theme.OmigramSuccessGreen
+import com.example.ui.theme.SocialBrandBlue
+import com.example.ui.theme.SocialPeachGradientTop
+import com.example.ui.theme.SocialPeachGradientMid
+import com.example.ui.theme.SocialPeachGradientBottom
+import com.example.ui.theme.SocialPillDark
 import kotlinx.coroutines.delay
 
 @Composable
@@ -129,14 +137,22 @@ fun RegisterScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(OmigramBackground)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        SocialPeachGradientTop,
+                        SocialPeachGradientMid,
+                        SocialPeachGradientBottom
+                    )
+                )
+            )
             .testTag("register_screen")
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 20.dp),
+                .padding(horizontal = 20.dp, vertical = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Top App Bar
@@ -146,120 +162,150 @@ fun RegisterScreen(
                     .padding(top = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(
-                    onClick = {
-                        if (currentStep > 1) {
-                            currentStep -= 1
-                        } else {
-                            onNavigateBack()
-                        }
-                    },
-                    modifier = Modifier.testTag("register_back_button")
+                Surface(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .shadow(4.dp, CircleShape, spotColor = Color.Black.copy(alpha = 0.06f)),
+                    shape = CircleShape,
+                    color = Color.White
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        tint = OmigramPrimaryText
-                    )
+                    IconButton(
+                        onClick = {
+                            if (currentStep > 1) {
+                                currentStep -= 1
+                            } else {
+                                onNavigateBack()
+                            }
+                        },
+                        modifier = Modifier.testTag("register_back_button")
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color(0xFF1A1A1A),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.weight(1f))
 
                 // Step indicator pill
                 Surface(
-                    color = OmigramSecondaryBackground,
+                    color = Color.White,
                     shape = RoundedCornerShape(999.dp),
-                    modifier = Modifier.border(1.dp, OmigramBorder, RoundedCornerShape(999.dp))
+                    modifier = Modifier.shadow(3.dp, RoundedCornerShape(999.dp), spotColor = Color.Black.copy(alpha = 0.05f))
                 ) {
                     Text(
                         text = "Step $currentStep of 4",
                         fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = OmigramSecondaryText,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1A1A1A),
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
                     )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Omigram Logo
+            OmigramLogo(fontSize = 36.sp)
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // White Card Container for Registration Form
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(
+                        elevation = 8.dp,
+                        shape = RoundedCornerShape(26.dp),
+                        spotColor = Color(0xFFD4A373).copy(alpha = 0.25f)
+                    ),
+                shape = RoundedCornerShape(26.dp),
+                color = Color.White
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp)
+                ) {
+                    // Animated step container
+                    AnimatedContent(
+                        targetState = currentStep,
+                        transitionSpec = {
+                            if (targetState > initialState) {
+                                slideInHorizontally { width -> width } + fadeIn() togetherWith
+                                        slideOutHorizontally { width -> -width } + fadeOut()
+                            } else {
+                                slideInHorizontally { width -> -width } + fadeIn() togetherWith
+                                        slideOutHorizontally { width -> width } + fadeOut()
+                            }
+                        },
+                        label = "step_transition"
+                    ) { step ->
+                        when (step) {
+                            1 -> StepOneEmailPassword(
+                                email = email,
+                                onEmailChange = { email = it },
+                                password = password,
+                                onPasswordChange = { password = it },
+                                passwordVisible = passwordVisible,
+                                onTogglePasswordVisibility = { passwordVisible = !passwordVisible },
+                                onNext = { currentStep = 2 },
+                                onNavigateToLogin = onNavigateBack
+                            )
+                            2 -> StepTwoVerification(
+                                email = email.ifBlank { "your email" },
+                                otpDigits = otpDigits,
+                                onDigitChange = { index, value ->
+                                    val updated = otpDigits.toMutableList()
+                                    updated[index] = value
+                                    otpDigits = updated
+                                    if (updated.all { it.isNotBlank() }) {
+                                        currentStep = 3
+                                    }
+                                },
+                                resendTimer = resendTimer,
+                                onResend = { resendTimer = 45 },
+                                onVerify = { currentStep = 3 }
+                            )
+                            3 -> StepThreeProfile(
+                                fullName = fullName,
+                                onFullNameChange = { fullName = it },
+                                username = username,
+                                onUsernameChange = { username = it },
+                                bio = bio,
+                                onBioChange = { bio = it },
+                                avatarUrl = selectedAvatarUrl,
+                                onChangeAvatar = {
+                                    selectedAvatarUrl = if (selectedAvatarUrl.contains("photo-1534528741775")) {
+                                        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80"
+                                    } else {
+                                        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80"
+                                    }
+                                },
+                                onNext = { currentStep = 4 }
+                            )
+                            4 -> StepFourTerms(
+                                termsAgreed = termsAgreed,
+                                onTermsChange = { termsAgreed = it },
+                                isLoading = uiState is AuthUiState.Loading,
+                                onSubmit = {
+                                    viewModel.register(
+                                        fullName = fullName.ifBlank { "Alex Mercer" },
+                                        username = username.ifBlank { "alexmercer" },
+                                        email = email.ifBlank { "alex.mercer@omigram.app" },
+                                        password = password.ifBlank { "password123" }
+                                    )
+                                }
+                            )
+                        }
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-
-            // Omigram Logo
-            OmigramLogo(fontSize = 38.sp)
-
-            Spacer(modifier = Modifier.height(28.dp))
-
-            // Animated step container
-            AnimatedContent(
-                targetState = currentStep,
-                transitionSpec = {
-                    if (targetState > initialState) {
-                        slideInHorizontally { width -> width } + fadeIn() togetherWith
-                                slideOutHorizontally { width -> -width } + fadeOut()
-                    } else {
-                        slideInHorizontally { width -> -width } + fadeIn() togetherWith
-                                slideOutHorizontally { width -> width } + fadeOut()
-                    }
-                },
-                label = "step_transition"
-            ) { step ->
-                when (step) {
-                    1 -> StepOneEmailPassword(
-                        email = email,
-                        onEmailChange = { email = it },
-                        password = password,
-                        onPasswordChange = { password = it },
-                        passwordVisible = passwordVisible,
-                        onTogglePasswordVisibility = { passwordVisible = !passwordVisible },
-                        onNext = { currentStep = 2 },
-                        onNavigateToLogin = onNavigateBack
-                    )
-                    2 -> StepTwoVerification(
-                        email = email.ifBlank { "your email" },
-                        otpDigits = otpDigits,
-                        onDigitChange = { index, value ->
-                            val updated = otpDigits.toMutableList()
-                            updated[index] = value
-                            otpDigits = updated
-                            if (updated.all { it.isNotBlank() }) {
-                                currentStep = 3
-                            }
-                        },
-                        resendTimer = resendTimer,
-                        onResend = { resendTimer = 45 },
-                        onVerify = { currentStep = 3 }
-                    )
-                    3 -> StepThreeProfile(
-                        fullName = fullName,
-                        onFullNameChange = { fullName = it },
-                        username = username,
-                        onUsernameChange = { username = it },
-                        bio = bio,
-                        onBioChange = { bio = it },
-                        avatarUrl = selectedAvatarUrl,
-                        onChangeAvatar = {
-                            selectedAvatarUrl = if (selectedAvatarUrl.contains("photo-1534528741775")) {
-                                "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80"
-                            } else {
-                                "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80"
-                            }
-                        },
-                        onNext = { currentStep = 4 }
-                    )
-                    4 -> StepFourTerms(
-                        termsAgreed = termsAgreed,
-                        onTermsChange = { termsAgreed = it },
-                        isLoading = uiState is AuthUiState.Loading,
-                        onSubmit = {
-                            viewModel.register(
-                                fullName = fullName.ifBlank { "Alex Mercer" },
-                                username = username.ifBlank { "alexmercer" },
-                                email = email.ifBlank { "alex.mercer@omigram.app" },
-                                password = password.ifBlank { "password123" }
-                            )
-                        }
-                    )
-                }
-            }
         }
     }
 }
@@ -284,21 +330,20 @@ private fun StepOneEmailPassword(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Create Your Account",
+            text = "Create Account",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = OmigramPrimaryText
+            color = Color(0xFF1A1A1A)
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            text = "Sign up to see photos and videos from your friends.",
-            fontSize = 14.sp,
-            color = OmigramSecondaryText,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 16.dp)
+            text = "Sign up to connect, share moments, and explore.",
+            fontSize = 13.5.sp,
+            color = Color(0xFF7A7A7A),
+            textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         OutlinedTextField(
             value = email,
@@ -306,14 +351,14 @@ private fun StepOneEmailPassword(
             label = { Text("Email address", fontSize = 13.sp) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            shape = RoundedCornerShape(10.dp),
+            shape = RoundedCornerShape(14.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = OmigramSecondaryBackground,
-                unfocusedContainerColor = OmigramSecondaryBackground,
-                focusedBorderColor = OmigramBorder,
-                unfocusedBorderColor = OmigramBorder,
-                focusedTextColor = OmigramPrimaryText,
-                unfocusedTextColor = OmigramPrimaryText
+                focusedContainerColor = Color(0xFFFAFAFA),
+                unfocusedContainerColor = Color(0xFFFAFAFA),
+                focusedBorderColor = SocialBrandBlue,
+                unfocusedBorderColor = Color(0xFFE5E5EA),
+                focusedTextColor = Color(0xFF1A1A1A),
+                unfocusedTextColor = Color(0xFF1A1A1A)
             ),
             modifier = Modifier
                 .fillMaxWidth()
@@ -331,7 +376,7 @@ private fun StepOneEmailPassword(
                     Icon(
                         imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                         contentDescription = "Toggle password visibility",
-                        tint = OmigramSecondaryText,
+                        tint = Color(0xFF8E8E93),
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -339,29 +384,29 @@ private fun StepOneEmailPassword(
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            shape = RoundedCornerShape(10.dp),
+            shape = RoundedCornerShape(14.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = OmigramSecondaryBackground,
-                unfocusedContainerColor = OmigramSecondaryBackground,
-                focusedBorderColor = OmigramBorder,
-                unfocusedBorderColor = OmigramBorder,
-                focusedTextColor = OmigramPrimaryText,
-                unfocusedTextColor = OmigramPrimaryText
+                focusedContainerColor = Color(0xFFFAFAFA),
+                unfocusedContainerColor = Color(0xFFFAFAFA),
+                focusedBorderColor = SocialBrandBlue,
+                unfocusedBorderColor = Color(0xFFE5E5EA),
+                focusedTextColor = Color(0xFF1A1A1A),
+                unfocusedTextColor = Color(0xFF1A1A1A)
             ),
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("register_password_input")
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(22.dp))
 
         Button(
             onClick = onNext,
             enabled = isValid,
-            shape = RoundedCornerShape(999.dp),
+            shape = RoundedCornerShape(14.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = OmigramAccentBlue,
-                disabledContainerColor = OmigramAccentBlue.copy(alpha = 0.5f)
+                containerColor = SocialPillDark,
+                disabledContainerColor = SocialPillDark.copy(alpha = 0.4f)
             ),
             modifier = Modifier
                 .fillMaxWidth()
@@ -376,7 +421,7 @@ private fun StepOneEmailPassword(
             )
         }
 
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -384,14 +429,14 @@ private fun StepOneEmailPassword(
             Text(
                 text = "Already have an account?",
                 fontSize = 13.sp,
-                color = OmigramSecondaryText
+                color = Color(0xFF7A7A7A)
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = "Log in",
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
-                color = OmigramAccentBlue,
+                color = SocialBrandBlue,
                 modifier = Modifier
                     .clickable { onNavigateToLogin() }
                     .testTag("register_login_link")
@@ -417,21 +462,20 @@ private fun StepTwoVerification(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Enter Confirmation Code",
+            text = "Verification Code",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = OmigramPrimaryText
+            color = Color(0xFF1A1A1A)
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            text = "Enter the 6-digit confirmation code sent to $email",
-            fontSize = 14.sp,
-            color = OmigramSecondaryText,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 16.dp)
+            text = "Enter the 6-digit code sent to $email",
+            fontSize = 13.5.sp,
+            color = Color(0xFF7A7A7A),
+            textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(26.dp))
 
         // 6 distinct input boxes
         Row(
@@ -442,13 +486,13 @@ private fun StepTwoVerification(
                 val digit = otpDigits[i]
                 Box(
                     modifier = Modifier
-                        .size(48.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(OmigramSecondaryBackground)
+                        .size(46.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFFFAFAFA))
                         .border(
                             width = 1.dp,
-                            color = if (digit.isNotBlank()) OmigramAccentBlue else OmigramBorder,
-                            shape = RoundedCornerShape(10.dp)
+                            color = if (digit.isNotBlank()) SocialBrandBlue else Color(0xFFE5E5EA),
+                            shape = RoundedCornerShape(12.dp)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -466,7 +510,7 @@ private fun StepTwoVerification(
                         textStyle = androidx.compose.ui.text.TextStyle(
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
-                            color = OmigramPrimaryText,
+                            color = Color(0xFF1A1A1A),
                             textAlign = TextAlign.Center
                         ),
                         singleLine = true,
@@ -478,15 +522,15 @@ private fun StepTwoVerification(
             }
         }
 
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         Button(
             onClick = onVerify,
             enabled = isComplete || otpDigits.any { it.isNotBlank() },
-            shape = RoundedCornerShape(999.dp),
+            shape = RoundedCornerShape(14.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = OmigramAccentBlue,
-                disabledContainerColor = OmigramAccentBlue.copy(alpha = 0.5f)
+                containerColor = SocialPillDark,
+                disabledContainerColor = SocialPillDark.copy(alpha = 0.4f)
             ),
             modifier = Modifier
                 .fillMaxWidth()
@@ -501,13 +545,13 @@ private fun StepTwoVerification(
             )
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         if (resendTimer > 0) {
             Text(
                 text = "Resend code in ${resendTimer}s",
                 fontSize = 13.sp,
-                color = OmigramSecondaryText
+                color = Color(0xFF8E8E93)
             )
         } else {
             TextButton(onClick = onResend) {
@@ -515,7 +559,7 @@ private fun StepTwoVerification(
                     text = "Resend code",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
-                    color = OmigramAccentBlue
+                    color = SocialBrandBlue
                 )
             }
         }
@@ -541,25 +585,25 @@ private fun StepThreeProfile(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Add Your Profile Details",
+            text = "Profile Details",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = OmigramPrimaryText
+            color = Color(0xFF1A1A1A)
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            text = "Choose your name and how people can find you on Omigram.",
-            fontSize = 14.sp,
-            color = OmigramSecondaryText,
+            text = "Choose your photo and public username.",
+            fontSize = 13.5.sp,
+            color = Color(0xFF7A7A7A),
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         // Avatar with Camera Icon Overlay
         Box(
             modifier = Modifier
-                .size(96.dp)
+                .size(92.dp)
                 .clickable { onChangeAvatar() }
                 .testTag("register_avatar_picker"),
             contentAlignment = Alignment.BottomEnd
@@ -571,27 +615,27 @@ private fun StepThreeProfile(
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(CircleShape)
-                    .border(2.dp, OmigramBorder, CircleShape)
+                    .border(2.dp, Color(0xFFE5E5EA), CircleShape)
             )
 
             Box(
                 modifier = Modifier
-                    .size(32.dp)
+                    .size(30.dp)
                     .clip(CircleShape)
-                    .background(OmigramAccentBlue)
-                    .border(2.dp, OmigramBackground, CircleShape),
+                    .background(SocialBrandBlue)
+                    .border(2.dp, Color.White, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.CameraAlt,
                     contentDescription = "Change photo",
                     tint = Color.White,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(15.dp)
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         // Full Name Field
         OutlinedTextField(
@@ -599,14 +643,14 @@ private fun StepThreeProfile(
             onValueChange = onFullNameChange,
             label = { Text("Full Name", fontSize = 13.sp) },
             singleLine = true,
-            shape = RoundedCornerShape(10.dp),
+            shape = RoundedCornerShape(14.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = OmigramSecondaryBackground,
-                unfocusedContainerColor = OmigramSecondaryBackground,
-                focusedBorderColor = OmigramBorder,
-                unfocusedBorderColor = OmigramBorder,
-                focusedTextColor = OmigramPrimaryText,
-                unfocusedTextColor = OmigramPrimaryText
+                focusedContainerColor = Color(0xFFFAFAFA),
+                unfocusedContainerColor = Color(0xFFFAFAFA),
+                focusedBorderColor = SocialBrandBlue,
+                unfocusedBorderColor = Color(0xFFE5E5EA),
+                focusedTextColor = Color(0xFF1A1A1A),
+                unfocusedTextColor = Color(0xFF1A1A1A)
             ),
             modifier = Modifier
                 .fillMaxWidth()
@@ -625,20 +669,20 @@ private fun StepThreeProfile(
                     Icon(
                         imageVector = Icons.Default.CheckCircle,
                         contentDescription = "Username available",
-                        tint = OmigramSuccessGreen,
+                        tint = Color(0xFF34C759),
                         modifier = Modifier.size(20.dp)
                     )
                 }
             },
             singleLine = true,
-            shape = RoundedCornerShape(10.dp),
+            shape = RoundedCornerShape(14.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = OmigramSecondaryBackground,
-                unfocusedContainerColor = OmigramSecondaryBackground,
-                focusedBorderColor = if (isUsernameAvailable) OmigramSuccessGreen else OmigramBorder,
-                unfocusedBorderColor = OmigramBorder,
-                focusedTextColor = OmigramPrimaryText,
-                unfocusedTextColor = OmigramPrimaryText
+                focusedContainerColor = Color(0xFFFAFAFA),
+                unfocusedContainerColor = Color(0xFFFAFAFA),
+                focusedBorderColor = if (isUsernameAvailable) Color(0xFF34C759) else SocialBrandBlue,
+                unfocusedBorderColor = Color(0xFFE5E5EA),
+                focusedTextColor = Color(0xFF1A1A1A),
+                unfocusedTextColor = Color(0xFF1A1A1A)
             ),
             modifier = Modifier
                 .fillMaxWidth()
@@ -655,7 +699,7 @@ private fun StepThreeProfile(
                 Text(
                     text = "✓ @$username is available",
                     fontSize = 12.sp,
-                    color = OmigramSuccessGreen,
+                    color = Color(0xFF34C759),
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -669,29 +713,29 @@ private fun StepThreeProfile(
             onValueChange = onBioChange,
             label = { Text("Bio (optional)", fontSize = 13.sp) },
             maxLines = 3,
-            shape = RoundedCornerShape(10.dp),
+            shape = RoundedCornerShape(14.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = OmigramSecondaryBackground,
-                unfocusedContainerColor = OmigramSecondaryBackground,
-                focusedBorderColor = OmigramBorder,
-                unfocusedBorderColor = OmigramBorder,
-                focusedTextColor = OmigramPrimaryText,
-                unfocusedTextColor = OmigramPrimaryText
+                focusedContainerColor = Color(0xFFFAFAFA),
+                unfocusedContainerColor = Color(0xFFFAFAFA),
+                focusedBorderColor = SocialBrandBlue,
+                unfocusedBorderColor = Color(0xFFE5E5EA),
+                focusedTextColor = Color(0xFF1A1A1A),
+                unfocusedTextColor = Color(0xFF1A1A1A)
             ),
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("register_bio_input")
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(22.dp))
 
         Button(
             onClick = onNext,
             enabled = fullName.isNotBlank() && isUsernameAvailable,
-            shape = RoundedCornerShape(999.dp),
+            shape = RoundedCornerShape(14.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = OmigramAccentBlue,
-                disabledContainerColor = OmigramAccentBlue.copy(alpha = 0.5f)
+                containerColor = SocialPillDark,
+                disabledContainerColor = SocialPillDark.copy(alpha = 0.4f)
             ),
             modifier = Modifier
                 .fillMaxWidth()
@@ -723,24 +767,24 @@ private fun StepFourTerms(
             text = "Terms & Policies",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = OmigramPrimaryText
+            color = Color(0xFF1A1A1A)
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = "By continuing, you agree to Omigram's Terms of Service and Privacy Policy.",
-            fontSize = 14.sp,
-            color = OmigramSecondaryText,
+            fontSize = 13.5.sp,
+            color = Color(0xFF7A7A7A),
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(OmigramSecondaryBackground)
-                .border(1.dp, OmigramBorder, RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(14.dp))
+                .background(Color(0xFFFAFAFA))
+                .border(1.dp, Color(0xFFE5E5EA), RoundedCornerShape(14.dp))
                 .clickable { onTermsChange(!termsAgreed) }
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -749,8 +793,8 @@ private fun StepFourTerms(
                 checked = termsAgreed,
                 onCheckedChange = onTermsChange,
                 colors = CheckboxDefaults.colors(
-                    checkedColor = OmigramAccentBlue,
-                    uncheckedColor = OmigramSecondaryText
+                    checkedColor = SocialBrandBlue,
+                    uncheckedColor = Color(0xFF8E8E93)
                 ),
                 modifier = Modifier.testTag("terms_checkbox")
             )
@@ -758,20 +802,20 @@ private fun StepFourTerms(
             Text(
                 text = "I agree to the Terms of Service, Community Standards, and Data Policy.",
                 fontSize = 13.sp,
-                color = OmigramPrimaryText,
+                color = Color(0xFF1A1A1A),
                 lineHeight = 18.sp
             )
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(26.dp))
 
         Button(
             onClick = onSubmit,
             enabled = termsAgreed && !isLoading,
-            shape = RoundedCornerShape(999.dp),
+            shape = RoundedCornerShape(14.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = OmigramAccentBlue,
-                disabledContainerColor = OmigramAccentBlue.copy(alpha = 0.5f)
+                containerColor = SocialPillDark,
+                disabledContainerColor = SocialPillDark.copy(alpha = 0.4f)
             ),
             modifier = Modifier
                 .fillMaxWidth()

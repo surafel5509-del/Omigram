@@ -72,17 +72,24 @@ fun MessagesScreen(
     modifier: Modifier = Modifier
 ) {
     var searchQuery by remember { mutableStateOf("") }
-    val chats = SampleData.sampleChats
-    val activeUsers = SampleData.sampleUsers.filter { it.isOnline }
+    val chats = remember { SampleData.sampleChats.distinctBy { it.id } }
+    val activeUsers = remember(chats) {
+        SampleData.sampleUsers
+            .filter { it.isOnline && it.id != SampleData.CURRENT_USER_ID }
+            .distinctBy { it.id }
+    }
 
-    val filteredChats = if (searchQuery.isBlank()) {
-        chats
-    } else {
-        chats.filter {
-            it.participant.fullName.contains(searchQuery, ignoreCase = true) ||
-            it.participant.username.contains(searchQuery, ignoreCase = true) ||
-            it.lastMessage?.content?.contains(searchQuery, ignoreCase = true) == true
+    val filteredChats = remember(searchQuery, chats) {
+        val base = if (searchQuery.isBlank()) {
+            chats
+        } else {
+            chats.filter {
+                it.participant.fullName.contains(searchQuery, ignoreCase = true) ||
+                it.participant.username.contains(searchQuery, ignoreCase = true) ||
+                it.lastMessage?.content?.contains(searchQuery, ignoreCase = true) == true
+            }
         }
+        base.distinctBy { it.id }
     }
 
     Scaffold(

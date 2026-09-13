@@ -2,6 +2,7 @@ package com.example.di
 
 import android.content.Context
 import com.example.data.local.OmigoDatabase
+import com.example.data.remote.supabase.SupabaseAuthRepository
 import com.example.data.repository.LocalAuthRepository
 import com.example.data.repository.LocalCallRepository
 import com.example.data.repository.LocalChatRepository
@@ -34,8 +35,7 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
     }
 
     override val authRepository: AuthRepository by lazy {
-        LocalAuthRepository(database)
-        // Switch to SupabaseAuthRepository() when Supabase is connected
+        SupabaseAuthRepository(LocalAuthRepository(database))
     }
 
     override val userRepository: UserRepository by lazy {

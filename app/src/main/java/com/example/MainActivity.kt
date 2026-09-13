@@ -22,7 +22,7 @@ import com.example.presentation.navigation.OmigoNavGraph
 import com.example.presentation.settings.AppThemeMode
 import com.example.ui.theme.MyApplicationTheme
 import com.example.ui.theme.OmigramTheme
-import io.github.jan.supabase.gotrue.handleDeeplinks
+import io.github.jan.supabase.auth.handleDeeplinks
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
 
     private fun handleSupabaseDeepLink(intent: Intent?) {
         if (intent == null || !SupabaseClientProvider.isConfigured) return
-        runCatching { handleDeeplinks<Unit>(intent) }
+        runCatching { SupabaseClientProvider.client.handleDeeplinks(intent) }
     }
 }
 

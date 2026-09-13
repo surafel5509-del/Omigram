@@ -83,6 +83,7 @@ import com.example.ui.theme.OmigramSecondaryBackground
 import com.example.ui.theme.OmigramSecondaryText
 
 import androidx.compose.material.icons.outlined.AccountBox
+import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.PlayCircle
@@ -92,6 +93,7 @@ import com.example.ui.theme.SocialBrandBlue
 import com.example.ui.theme.SocialPeachGradientBottom
 import com.example.ui.theme.SocialPeachGradientMid
 import com.example.ui.theme.SocialPeachGradientTop
+import com.example.ui.theme.SocialVerifiedBadgeRed
 
 data class StoryHighlight(val id: String, val title: String, val coverUrl: String)
 
@@ -247,7 +249,7 @@ fun ProfileScreen(
                     Icon(
                         imageVector = Icons.Outlined.Verified,
                         contentDescription = "Verified",
-                        tint = SocialBrandBlue,
+                        tint = SocialVerifiedBadgeRed,
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -318,16 +320,16 @@ fun ProfileScreen(
                         testTag = "profile_tab_grid"
                     )
 
-                    // Segment 1: Video / Play
+                    // Segment 1: Chat / Messages
                     SegmentPillItem(
                         selected = selectedTab == 1,
                         onClick = { selectedTab = 1 },
                         icon = {
                             Icon(
-                                imageVector = Icons.Outlined.PlayCircle,
-                                contentDescription = "Videos",
+                                imageVector = Icons.Outlined.Email,
+                                contentDescription = "Conversations",
                                 tint = if (selectedTab == 1) Color(0xFF1A1A1A) else Color(0xFF8E8E93),
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(19.dp)
                             )
                         },
                         testTag = "profile_tab_video"
@@ -348,7 +350,7 @@ fun ProfileScreen(
                         testTag = "profile_tab_voice"
                     )
 
-                    // Segment 3: Tagged / Contact Card
+                    // Segment 3: Tagged / Profile
                     SegmentPillItem(
                         selected = selectedTab == 3,
                         onClick = { selectedTab = 3 },

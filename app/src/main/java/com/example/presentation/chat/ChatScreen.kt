@@ -261,13 +261,13 @@ fun ChatScreen(
                     .testTag("chat_messages_list")
             ) {
                 var lastDate = ""
-                messages.forEach { message ->
+                messages.forEachIndexed { index, message ->
                     val msgDate = SimpleDateFormat("MMMM d, yyyy", Locale.getDefault()).format(Date(message.createdAt))
                     if (msgDate != lastDate) {
                         val isToday = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date()) ==
                                 SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date(message.createdAt))
                         val label = if (isToday) "Today" else msgDate
-                        item(key = "date_$msgDate") {
+                        item(key = "date_${msgDate}_$index") {
                             DateSeparator(dateText = label)
                         }
                         lastDate = msgDate

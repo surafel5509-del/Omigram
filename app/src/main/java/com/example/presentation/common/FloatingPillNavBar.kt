@@ -17,19 +17,22 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.SmartDisplay
-import androidx.compose.material.icons.outlined.Group
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Explore
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.SmartDisplay
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,10 +55,10 @@ enum class SocialNavTab(
     val testTag: String
 ) {
     HOME("Home", Icons.Filled.Home, Icons.Outlined.Home, "pill_tab_home"),
-    REELS("Reels", Icons.Filled.SmartDisplay, Icons.Outlined.SmartDisplay, "pill_tab_reels"),
-    NOTIFICATIONS("Alerts", Icons.Outlined.Notifications, Icons.Outlined.Notifications, "pill_tab_notifications"),
-    FRIENDS("Profile", Icons.Outlined.Group, Icons.Outlined.Group, "pill_tab_friends"),
-    SETTINGS("Settings", Icons.Outlined.Settings, Icons.Outlined.Settings, "pill_tab_settings")
+    REELS("Explore", Icons.Filled.Explore, Icons.Outlined.Explore, "pill_tab_reels"),
+    NOTIFICATIONS("Likes", Icons.Filled.Favorite, Icons.Outlined.FavoriteBorder, "pill_tab_notifications"),
+    FRIENDS("Profile", Icons.Filled.Person, Icons.Outlined.Person, "pill_tab_friends"),
+    SETTINGS("Settings", Icons.Filled.Settings, Icons.Outlined.Settings, "pill_tab_settings")
 }
 
 @Composable
@@ -64,7 +67,7 @@ fun FloatingPillNavBar(
     onTabSelected: (SocialNavTab) -> Unit,
     onActionButtonClick: () -> Unit,
     modifier: Modifier = Modifier,
-    actionButtonIcon: ImageVector = Icons.Default.Add,
+    actionButtonIcon: ImageVector = Icons.Filled.Search,
     actionButtonColor: Color = SocialBrandBlue,
     actionButtonTag: String = "pill_action_button"
 ) {
@@ -74,7 +77,7 @@ fun FloatingPillNavBar(
         modifier = modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(horizontal = 14.dp, vertical = 10.dp),
+            .padding(horizontal = 16.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center
     ) {
         Row(
@@ -85,45 +88,56 @@ fun FloatingPillNavBar(
             Surface(
                 modifier = Modifier
                     .weight(1f)
-                    .height(60.dp)
+                    .height(58.dp)
                     .shadow(
-                        elevation = 12.dp,
+                        elevation = 10.dp,
                         shape = CircleShape,
-                        spotColor = Color.Black.copy(alpha = 0.12f),
-                        ambientColor = Color.Black.copy(alpha = 0.05f)
+                        spotColor = Color.Black.copy(alpha = 0.08f),
+                        ambientColor = Color.Black.copy(alpha = 0.04f)
                     )
                     .testTag("floating_pill_nav_bar"),
                 shape = CircleShape,
-                color = Color.White.copy(alpha = 0.96f),
+                color = Color.White,
                 border = androidx.compose.foundation.BorderStroke(
                     width = 1.dp,
-                    color = Color(0xFFE5E6EA).copy(alpha = 0.9f)
+                    color = Color(0xFFEBECEF)
                 )
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 7.dp),
+                        .padding(horizontal = 6.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    listOf(
-                        SocialNavTab.HOME,
-                        SocialNavTab.REELS,
-                        SocialNavTab.NOTIFICATIONS,
-                        SocialNavTab.FRIENDS
-                    ).forEach { tab ->
+                    val tabsToDisplay = if (selectedTab == SocialNavTab.SETTINGS) {
+                        listOf(
+                            SocialNavTab.HOME,
+                            SocialNavTab.REELS,
+                            SocialNavTab.NOTIFICATIONS,
+                            SocialNavTab.SETTINGS
+                        )
+                    } else {
+                        listOf(
+                            SocialNavTab.HOME,
+                            SocialNavTab.REELS,
+                            SocialNavTab.NOTIFICATIONS,
+                            SocialNavTab.FRIENDS
+                        )
+                    }
+
+                    tabsToDisplay.forEach { tab ->
                         val selected = selectedTab == tab
                         if (selected) {
                             Row(
                                 modifier = Modifier
                                     .clip(CircleShape)
-                                    .background(SocialPillDark)
+                                    .background(if (tab == SocialNavTab.SETTINGS) Color(0xFFECEEF2) else SocialPillDark)
                                     .clickable(
                                         interactionSource = interactionSource,
                                         indication = null
                                     ) { onTabSelected(tab) }
-                                    .padding(horizontal = 13.dp, vertical = 8.dp)
+                                    .padding(horizontal = 14.dp, vertical = 9.dp)
                                     .testTag(tab.testTag),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.Center
@@ -131,21 +145,21 @@ fun FloatingPillNavBar(
                                 Icon(
                                     imageVector = tab.filledIcon,
                                     contentDescription = tab.title,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(20.dp)
+                                    tint = if (tab == SocialNavTab.SETTINGS) Color(0xFF17171A) else Color.White,
+                                    modifier = Modifier.size(19.dp)
                                 )
                                 Spacer(Modifier.width(6.dp))
                                 Text(
                                     text = tab.title,
-                                    fontSize = 12.5.sp,
+                                    fontSize = 13.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = Color.White
+                                    color = if (tab == SocialNavTab.SETTINGS) Color(0xFF17171A) else Color.White
                                 )
                             }
                         } else {
                             Box(
                                 modifier = Modifier
-                                    .size(44.dp)
+                                    .size(42.dp)
                                     .clip(CircleShape)
                                     .clickable(
                                         interactionSource = interactionSource,
@@ -157,7 +171,7 @@ fun FloatingPillNavBar(
                                 Icon(
                                     imageVector = tab.outlinedIcon,
                                     contentDescription = tab.title,
-                                    tint = Color(0xFF292A2F),
+                                    tint = Color(0xFF26262B),
                                     modifier = Modifier.size(22.dp)
                                 )
                             }
@@ -166,13 +180,14 @@ fun FloatingPillNavBar(
                 }
             }
 
-            Spacer(Modifier.width(11.dp))
+            Spacer(Modifier.width(12.dp))
 
+            // Vibrant Blue circular action button (Screenshot 1)
             Box(
                 modifier = Modifier
                     .size(58.dp)
                     .shadow(
-                        elevation = 10.dp,
+                        elevation = 8.dp,
                         shape = CircleShape,
                         spotColor = actionButtonColor.copy(alpha = 0.35f)
                     )
@@ -184,9 +199,9 @@ fun FloatingPillNavBar(
             ) {
                 Icon(
                     imageVector = actionButtonIcon,
-                    contentDescription = "Create",
+                    contentDescription = "Action",
                     tint = Color.White,
-                    modifier = Modifier.size(28.dp)
+                    modifier = Modifier.size(26.dp)
                 )
             }
         }

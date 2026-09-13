@@ -4,27 +4,28 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
 /** Omigram visual system: inspired by the supplied soft social references, but intentionally original. */
-val OmigramBackground = Color(0xFFFFFCFA)
-val OmigramSecondaryBackground = Color(0xFFF6F7F9)
+val OmigramBackground = Color(0xFFFAF9F7)
+val OmigramSecondaryBackground = Color(0xFFF4F5F8)
 val OmigramPrimaryText = Color(0xFF17171A)
-val OmigramSecondaryText = Color(0xFF74747C)
-val OmigramBorder = Color(0xFFE6E7EB)
-val OmigramAccentBlue = Color(0xFF5B5FEF)
-val OmigramBrandIndigo = Color(0xFF5B5FEF)
-val OmigramBrandCoral = Color(0xFFFF6B5F)
+val OmigramSecondaryText = Color(0xFF8E8E93)
+val OmigramBorder = Color(0xFFEBECEF)
+val OmigramAccentBlue = Color(0xFF2563EB)
+val OmigramBrandIndigo = Color(0xFF2563EB)
+val OmigramBrandCoral = Color(0xFFC85E43)
 val OmigramErrorRed = Color(0xFFE5484D)
-val OmigramSuccessGreen = Color(0xFF22C55E)
+val OmigramSuccessGreen = Color(0xFF34C759)
 
-val SocialBrandBlue = OmigramBrandIndigo
+val SocialBrandBlue = Color(0xFF2563EB)
 val SocialPillDark = Color(0xFF19191D)
 val SocialPillLight = Color(0xFFF1F2F5)
-val SocialPeachGradientTop = Color(0xFFFFEEE7)
-val SocialPeachGradientMid = Color(0xFFFFF5F0)
-val SocialPeachGradientBottom = OmigramBackground
-val SocialAvatarRingCoral = OmigramBrandCoral
-val SocialSoftCardBg = Color(0xFFF7F7F9)
-val SocialSoftIconBg = Color(0xFFF1F2F5)
-val SocialToggleGreen = OmigramSuccessGreen
+val SocialPeachGradientTop = Color(0xFFFBECE4)
+val SocialPeachGradientMid = Color(0xFFFBF4EF)
+val SocialPeachGradientBottom = Color(0xFFFAF6F2)
+val SocialAvatarRingCoral = Color(0xFFC85E43)
+val SocialSoftCardBg = Color(0xFFF5F6F8)
+val SocialSoftIconBg = Color(0xFFF3F4F6)
+val SocialToggleGreen = Color(0xFF34C759)
+val SocialVerifiedBadgeRed = Color(0xFFC85E43)
 
 val SentBubbleBlue = OmigramBrandIndigo
 val ReceivedBubbleGray = Color(0xFFF0F0F2)

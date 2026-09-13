@@ -23,6 +23,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Videocam
@@ -94,246 +96,358 @@ fun UserProfileScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            SocialPeachGradientTop,
-                            SocialPeachGradientMid,
-                            SocialPeachGradientBottom
-                        )
-                    )
-                )
+                .background(OmigramBackground)
                 .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-            // Screenshot 3 Top Navigation Bar: Back on left, Share & Link on right
-            Row(
+            // Screenshot 2 Header: Badge "2", Title "Personalized Profiles", Subtitle
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .statusBarsPadding()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(horizontal = 8.dp, vertical = 8.dp)
             ) {
-                // Circular Back Button
+                // Step Indicator Badge "2"
                 Surface(
                     modifier = Modifier
-                        .size(42.dp)
-                        .shadow(4.dp, CircleShape, spotColor = Color.Black.copy(alpha = 0.08f)),
+                        .size(32.dp)
+                        .shadow(4.dp, CircleShape, spotColor = Color.Black.copy(alpha = 0.06f)),
                     shape = CircleShape,
                     color = Color.White
                 ) {
-                    IconButton(
-                        onClick = onNavigateBack,
-                        modifier = Modifier.testTag("user_profile_back_button")
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color(0xFF1A1A1A),
-                            modifier = Modifier.size(20.dp)
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "2",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1A1A1A)
                         )
                     }
                 }
 
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    // Circular Share Button
-                    Surface(
-                        modifier = Modifier
-                            .size(42.dp)
-                            .shadow(4.dp, CircleShape, spotColor = Color.Black.copy(alpha = 0.08f)),
-                        shape = CircleShape,
-                        color = Color.White
-                    ) {
-                        IconButton(
-                            onClick = {
-                                Toast.makeText(context, "Profile shared!", Toast.LENGTH_SHORT).show()
-                            },
-                            modifier = Modifier.testTag("user_profile_share_button")
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Share,
-                                contentDescription = "Share Profile",
-                                tint = Color(0xFF1A1A1A),
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
+                Spacer(modifier = Modifier.height(14.dp))
 
-                    // Circular Link Button
-                    Surface(
-                        modifier = Modifier
-                            .size(42.dp)
-                            .shadow(4.dp, CircleShape, spotColor = Color.Black.copy(alpha = 0.08f)),
-                        shape = CircleShape,
-                        color = Color.White
-                    ) {
-                        IconButton(
-                            onClick = {
-                                Toast.makeText(context, "Profile link copied to clipboard!", Toast.LENGTH_SHORT).show()
-                            },
-                            modifier = Modifier.testTag("user_profile_link_button")
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Link,
-                                contentDescription = "Copy Link",
-                                tint = Color(0xFF1A1A1A),
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Center Avatar with Online Status Indicator
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Box(
-                    modifier = Modifier.size(92.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    AsyncImage(
-                        model = user.avatarUrl,
-                        contentDescription = user.fullName,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(88.dp)
-                            .clip(CircleShape)
-                            .border(2.dp, Color.White, CircleShape)
-                    )
-
-                    // Green Online Indicator Dot (or status dot)
-                    Box(
-                        modifier = Modifier
-                            .size(16.dp)
-                            .align(Alignment.BottomEnd)
-                            .clip(CircleShape)
-                            .background(Color(0xFF34C759))
-                            .border(2.5.dp, Color.White, CircleShape)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Name
                 Text(
-                    text = user.fullName,
-                    fontSize = 22.sp,
+                    text = "Personalized Profiles",
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1A1A1A),
-                    modifier = Modifier.testTag("user_profile_name")
+                    letterSpacing = (-0.5).sp
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(6.dp))
 
-                // Last seen recently
                 Text(
-                    text = if (user.isOnline) "Active now" else "Last seen recently",
-                    fontSize = 13.sp,
-                    color = Color(0xFF8E8E93),
-                    modifier = Modifier.testTag("user_profile_last_seen")
+                    text = "Add a personal touch with avatars, greetings, and relevant actions.",
+                    fontSize = 14.sp,
+                    color = Color(0xFF74747C),
+                    lineHeight = 20.sp
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // Screenshot 3: 4 Squircle Action Buttons in a horizontal row
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                // Button 1: Message
-                SquircleActionButton(
-                    icon = Icons.Outlined.ChatBubbleOutline,
-                    label = "Message",
-                    onClick = {
-                        val chat = SampleData.sampleChats.find { it.participant.id == user.id }
-                        if (chat != null) onNavigateToChat(chat.id)
-                        else if (SampleData.sampleChats.isNotEmpty()) onNavigateToChat(SampleData.sampleChats.first().id)
-                    },
-                    testTag = "action_btn_message"
-                )
-
-                // Button 2: Call
-                SquircleActionButton(
-                    icon = Icons.Filled.Call,
-                    label = "Call",
-                    onClick = { activeCallType = "Voice Call" },
-                    testTag = "action_btn_call"
-                )
-
-                // Button 3: Video call
-                SquircleActionButton(
-                    icon = Icons.Filled.Videocam,
-                    label = "Video call",
-                    onClick = { activeCallType = "Video Call" },
-                    testTag = "action_btn_video"
-                )
-
-                // Button 4: Private
-                SquircleActionButton(
-                    icon = Icons.Filled.Lock,
-                    label = if (isPrivateMode) "Secured" else "Private",
-                    onClick = {
-                        isPrivateMode = !isPrivateMode
-                        val status = if (isPrivateMode) "Private mode enabled" else "Private mode disabled"
-                        Toast.makeText(context, status, Toast.LENGTH_SHORT).show()
-                    },
-                    iconTint = if (isPrivateMode) Color(0xFF34C759) else Color(0xFF1A1A1A),
-                    testTag = "action_btn_private"
-                )
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Screenshot 3: Bio Section Card
+            // Screenshot 2 Floating Card with warm peach gradient
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .shadow(2.dp, RoundedCornerShape(20.dp), spotColor = Color.Black.copy(alpha = 0.04f)),
-                shape = RoundedCornerShape(20.dp),
-                color = Color.White,
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFF0EAE6))
+                    .shadow(
+                        elevation = 12.dp,
+                        shape = RoundedCornerShape(32.dp),
+                        spotColor = Color(0xFFD4A373).copy(alpha = 0.25f),
+                        ambientColor = Color.Black.copy(alpha = 0.05f)
+                    )
+                    .testTag("user_profile_card"),
+                shape = RoundedCornerShape(32.dp),
+                color = Color.Transparent
             ) {
-                Column(
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(18.dp)
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color(0xFFFBECE4),
+                                    Color(0xFFFBF4EF),
+                                    Color(0xFFFAF6F2)
+                                )
+                            )
+                        )
+                        .padding(20.dp)
                 ) {
-                    Text(
-                        text = "bio",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color(0xFF8E8E93)
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = user.bio,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Normal,
-                        color = Color(0xFF1A1A1A),
-                        lineHeight = 22.sp
-                    )
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        // Top Navigation Bar inside card: Back on left, Share & Link on right
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Circular Back Button
+                            Surface(
+                                modifier = Modifier
+                                    .size(42.dp)
+                                    .shadow(4.dp, CircleShape, spotColor = Color.Black.copy(alpha = 0.08f)),
+                                shape = CircleShape,
+                                color = Color.White
+                            ) {
+                                IconButton(
+                                    onClick = onNavigateBack,
+                                    modifier = Modifier.testTag("user_profile_back_button")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                        contentDescription = "Back",
+                                        tint = Color(0xFF1A1A1A),
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+
+                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                // Circular Share Button
+                                Surface(
+                                    modifier = Modifier
+                                        .size(42.dp)
+                                        .shadow(4.dp, CircleShape, spotColor = Color.Black.copy(alpha = 0.08f)),
+                                    shape = CircleShape,
+                                    color = Color.White
+                                ) {
+                                    IconButton(
+                                        onClick = {
+                                            Toast.makeText(context, "Profile shared!", Toast.LENGTH_SHORT).show()
+                                        },
+                                        modifier = Modifier.testTag("user_profile_share_button")
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.Share,
+                                            contentDescription = "Share Profile",
+                                            tint = Color(0xFF1A1A1A),
+                                            modifier = Modifier.size(19.dp)
+                                        )
+                                    }
+                                }
+
+                                // Circular Link Button
+                                Surface(
+                                    modifier = Modifier
+                                        .size(42.dp)
+                                        .shadow(4.dp, CircleShape, spotColor = Color.Black.copy(alpha = 0.08f)),
+                                    shape = CircleShape,
+                                    color = Color.White
+                                ) {
+                                    IconButton(
+                                        onClick = {
+                                            Toast.makeText(context, "Profile link copied to clipboard!", Toast.LENGTH_SHORT).show()
+                                        },
+                                        modifier = Modifier.testTag("user_profile_link_button")
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.Link,
+                                            contentDescription = "Copy Link",
+                                            tint = Color(0xFF1A1A1A),
+                                            modifier = Modifier.size(19.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Center Avatar with Online Status Indicator
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Box(
+                                modifier = Modifier.size(96.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                AsyncImage(
+                                    model = user.avatarUrl,
+                                    contentDescription = user.fullName,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(92.dp)
+                                        .clip(CircleShape)
+                                        .border(2.5.dp, Color.White, CircleShape)
+                                )
+
+                                // Green Online Indicator Dot
+                                Box(
+                                    modifier = Modifier
+                                        .size(18.dp)
+                                        .align(Alignment.BottomEnd)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFF34C759))
+                                        .border(2.5.dp, Color.White, CircleShape)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(14.dp))
+
+                            // Name
+                            Text(
+                                text = user.fullName,
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF1A1A1A),
+                                modifier = Modifier.testTag("user_profile_name")
+                            )
+
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            // Last seen recently
+                            Text(
+                                text = if (user.isOnline) "Active now" else "Last seen recently",
+                                fontSize = 13.sp,
+                                color = Color(0xFF8E8E93),
+                                modifier = Modifier.testTag("user_profile_last_seen")
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        // Screenshot 2: 4 Squircle Action Buttons in a horizontal row
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            // Button 1: Message
+                            SquircleActionButton(
+                                icon = Icons.Outlined.ChatBubbleOutline,
+                                label = "Message",
+                                onClick = {
+                                    val chat = SampleData.sampleChats.find { it.participant.id == user.id }
+                                    if (chat != null) onNavigateToChat(chat.id)
+                                    else if (SampleData.sampleChats.isNotEmpty()) onNavigateToChat(SampleData.sampleChats.first().id)
+                                },
+                                testTag = "action_btn_message"
+                            )
+
+                            // Button 2: Call
+                            SquircleActionButton(
+                                icon = Icons.Filled.Call,
+                                label = "Call",
+                                onClick = { activeCallType = "Voice Call" },
+                                testTag = "action_btn_call"
+                            )
+
+                            // Button 3: Video call
+                            SquircleActionButton(
+                                icon = Icons.Filled.Videocam,
+                                label = "Video call",
+                                onClick = { activeCallType = "Video Call" },
+                                testTag = "action_btn_video"
+                            )
+
+                            // Button 4: Private
+                            SquircleActionButton(
+                                icon = Icons.Filled.Lock,
+                                label = if (isPrivateMode) "Secured" else "Private",
+                                onClick = {
+                                    isPrivateMode = !isPrivateMode
+                                    val status = if (isPrivateMode) "Private mode enabled" else "Private mode disabled"
+                                    Toast.makeText(context, status, Toast.LENGTH_SHORT).show()
+                                },
+                                iconTint = if (isPrivateMode) Color(0xFF34C759) else Color(0xFF1A1A1A),
+                                testTag = "action_btn_private"
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        // Screenshot 2: Bio Section Card inside the Peach container
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .shadow(2.dp, RoundedCornerShape(20.dp), spotColor = Color.Black.copy(alpha = 0.04f)),
+                            shape = RoundedCornerShape(20.dp),
+                            color = Color.White.copy(alpha = 0.9f),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(18.dp)
+                            ) {
+                                Text(
+                                    text = "bio",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = Color(0xFF8E8E93)
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = if (user.fullName.contains("Jennifer", ignoreCase = true)) "Mother of Maggie and Maral." else user.bio,
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    color = Color(0xFF1A1A1A),
+                                    lineHeight = 22.sp
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(18.dp))
+
+                        // Screenshot 2 Bottom Navigation Indicator Row (Bookmark left, Arrow right)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Surface(
+                                modifier = Modifier
+                                    .size(38.dp)
+                                    .shadow(2.dp, CircleShape, spotColor = Color.Black.copy(alpha = 0.05f)),
+                                shape = CircleShape,
+                                color = Color.White
+                            ) {
+                                IconButton(onClick = {
+                                    Toast.makeText(context, "Saved to bookmarks", Toast.LENGTH_SHORT).show()
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Bookmark,
+                                        contentDescription = "Bookmark",
+                                        tint = Color(0xFF1A1A1A),
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+
+                            Surface(
+                                modifier = Modifier
+                                    .size(38.dp)
+                                    .shadow(2.dp, CircleShape, spotColor = Color.Black.copy(alpha = 0.05f)),
+                                shape = CircleShape,
+                                color = Color.White
+                            ) {
+                                IconButton(onClick = {
+                                    Toast.makeText(context, "Next profile", Toast.LENGTH_SHORT).show()
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                        contentDescription = "Next",
+                                        tint = Color(0xFF1A1A1A),
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Media / Photos Gallery
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 8.dp)
             ) {
                 Text(
                     text = "Shared Media",
-                    fontSize = 14.sp,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1A1A1A)
                 )
@@ -342,7 +456,7 @@ fun UserProfileScreen(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     userPhotos.take(3).forEach { photoUrl ->
                         AsyncImage(
@@ -352,7 +466,8 @@ fun UserProfileScreen(
                             modifier = Modifier
                                 .weight(1f)
                                 .aspectRatio(1f)
-                                .clip(RoundedCornerShape(14.dp))
+                                .clip(RoundedCornerShape(16.dp))
+                                .border(1.dp, Color(0xFFEBECEF), RoundedCornerShape(16.dp))
                         )
                     }
                 }

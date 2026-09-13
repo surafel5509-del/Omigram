@@ -25,22 +25,40 @@ object SampleData {
 
     val currentUserEntity = ProfileEntity(
         id = CURRENT_USER_ID,
-        username = "Michael.Anderson",
-        fullName = "Michael Anderson",
+        username = "alexmercer",
+        fullName = "Alex Mercer",
         avatarUrl = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80",
-        bio = "Product designer who focus on simplicity usability",
-        phone = "+1 (555) 890-1234",
-        email = "michael.anderson@gmail.com",
+        bio = "Visual storyteller & mobile developer • Building Omigram 📸",
+        phone = "+1 (555) 123-4567",
+        email = "alex.mercer@omigram.app",
         isOnline = true,
         lastSeen = System.currentTimeMillis()
     )
 
     val currentUser = User(
         id = CURRENT_USER_ID,
+        username = "alexmercer",
+        fullName = "Alex Mercer",
+        avatarUrl = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80",
+        bio = "Visual storyteller & mobile developer • Building Omigram 📸",
+        phone = "+1 (555) 123-4567",
+        email = "alex.mercer@omigram.app",
+        website = "https://omigram.app/alex",
+        isVerified = true,
+        isOnline = true,
+        postsCount = 42,
+        followersCount = 5820,
+        followingCount = 480,
+        joinedDate = "January 2023",
+        mutualFollowers = listOf("amberlawes", "sophiac")
+    )
+
+    val userMichael = User(
+        id = "user_michael",
         username = "Michael.Anderson",
         fullName = "Michael Anderson",
-        avatarUrl = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80",
-        bio = "Product designer who focus on simplicity usability",
+        avatarUrl = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80",
+        bio = "Product designer who focuses on simplicity and usability",
         phone = "+1 (555) 890-1234",
         email = "michael.anderson@gmail.com",
         website = "https://anderson.design",
@@ -52,8 +70,6 @@ object SampleData {
         joinedDate = "January 2023",
         mutualFollowers = listOf("amberlawes", "sophiac")
     )
-
-    val userMichael = currentUser
 
     val userJones = User(
         id = "user_jones",
@@ -171,7 +187,7 @@ object SampleData {
         joinedDate = "July 2023"
     )
 
-    val usersList = listOf(currentUser, userMichael, userAmber, userJennifer, userSophia, userMarcus)
+    val usersList = listOf(currentUser, userMichael, userAmber, userJennifer, userSophia, userMarcus, userJones, userBecker, userBente).distinctBy { it.id }
 
     val users = listOf(
         currentUserEntity,
@@ -230,7 +246,7 @@ object SampleData {
             isOnline = false,
             lastSeen = System.currentTimeMillis() - 2 * 3600 * 1000
         )
-    )
+    ).distinctBy { it.id }
 
     val stories = listOf(
         Story(
