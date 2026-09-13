@@ -60,7 +60,7 @@ class SupabaseStrictAuthRepository : AuthRepository {
                 ?: return Result.failure(IllegalStateException("Account creation failed."))
             if (user.emailConfirmedAt == null || client.auth.currentSessionOrNull() == null) {
                 runCatching { client.auth.signOut() }
-                return Result.failure(EmailVerificationRequiredException(email.trim()))
+                return Result.failure(OmigramEmailVerificationRequiredException(email.trim()))
             }
             Result.success(user.toDomain())
         } catch (e: Exception) {
@@ -109,5 +109,5 @@ class SupabaseStrictAuthRepository : AuthRepository {
     )
 }
 
-class EmailVerificationRequiredException(email: String) :
+class OmigramEmailVerificationRequiredException(email: String) :
     Exception("We sent a verification email to $email. Verify it before opening Omigram.")
