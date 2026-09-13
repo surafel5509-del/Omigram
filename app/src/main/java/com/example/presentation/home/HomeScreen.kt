@@ -217,7 +217,9 @@ fun HomeScreen(
                 OmigramTab.SEARCH -> ExploreScreen(onNavigateToUserProfile = onNavigateToUserProfile)
                 OmigramTab.CREATE -> CreateScreen(
                     onDismiss = { viewModel.selectTab(OmigramTab.HOME) },
-                    onPostCreated = { viewModel.addNewPost(it); viewModel.selectTab(OmigramTab.HOME) }
+                    onPostCreated = { viewModel.addNewPost(it) },
+                    onStoryCreated = { viewModel.addNewStory(it) },
+                    onReelCreated = { viewModel.addNewReel(it) }
                 )
                 OmigramTab.REELS -> ReelsScreen(onNavigateToUserProfile = onNavigateToUserProfile)
                 OmigramTab.PROFILE -> ProfileScreen(
@@ -232,7 +234,9 @@ fun HomeScreen(
     if (isCreatePostOpen) {
         CreateScreen(
             onDismiss = { isCreatePostOpen = false },
-            onPostCreated = { viewModel.addNewPost(it); isCreatePostOpen = false }
+            onPostCreated = { viewModel.addNewPost(it); isCreatePostOpen = false },
+            onStoryCreated = { viewModel.addNewStory(it); isCreatePostOpen = false },
+            onReelCreated = { viewModel.addNewReel(it); isCreatePostOpen = false }
         )
     }
     viewingStoryIndex?.let { index ->

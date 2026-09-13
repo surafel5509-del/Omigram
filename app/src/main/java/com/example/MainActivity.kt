@@ -34,7 +34,12 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             var themeMode by remember { mutableStateOf(AppThemeMode.LIGHT) }
-            OmigramTheme {
+            val isDark = when (themeMode) {
+                AppThemeMode.LIGHT -> false
+                AppThemeMode.DARK -> true
+                AppThemeMode.SYSTEM -> androidx.compose.foundation.isSystemInDarkTheme()
+            }
+            OmigramTheme(darkTheme = isDark) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

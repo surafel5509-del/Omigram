@@ -2,6 +2,7 @@ package com.example.presentation.common
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,8 +21,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.DoneAll
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,16 +36,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.core.model.Message
 import com.example.core.model.MessageStatus
-import com.example.data.local.SampleData
-import com.example.ui.theme.OmigramAccentBlue
-import com.example.ui.theme.OmigramBorder
-import com.example.ui.theme.OmigramPrimaryText
-import com.example.ui.theme.OmigramSecondaryBackground
-import com.example.ui.theme.OmigramSecondaryText
-import com.example.ui.theme.ReceivedBubbleGray
-import com.example.ui.theme.ReceivedBubbleText
-import com.example.ui.theme.SentBubbleBlue
-import com.example.ui.theme.SentBubbleText
+import com.example.ui.theme.SocialBrandBlue
+import com.example.ui.theme.SocialPillDark
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -58,24 +51,33 @@ fun MessageBubble(
     onReactionClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // 18dp rounded corners as requested
-    val bubbleShape = RoundedCornerShape(18.dp)
+    // Distinct editorial bubble shapes:
+    // Asymmetric corners giving a tailored, modern card silhouette
+    val bubbleShape = if (isCurrentUser) {
+        RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp, bottomStart = 18.dp, bottomEnd = 4.dp)
+    } else {
+        RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp, bottomEnd = 18.dp, bottomStart = 4.dp)
+    }
 
-    val bubbleBg = if (isCurrentUser) SentBubbleBlue else ReceivedBubbleGray
-    val contentColor = if (isCurrentUser) SentBubbleText else ReceivedBubbleText
+    val bubbleBg = if (isCurrentUser) Color(0xFF1E2430) else Color.White
+    val contentColor = if (isCurrentUser) Color.White else Color(0xFF1A1A1A)
     val timeString = SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(message.createdAt))
+
+    val isVoiceNote = message.content.startsWith("🎤") || message.content.contains("Voice note")
 
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 14.dp, vertical = 3.dp),
+            .padding(horizontal = 14.dp, vertical = 4.dp),
         horizontalAlignment = if (isCurrentUser) Alignment.End else Alignment.Start
     ) {
         Surface(
             shape = bubbleShape,
             color = bubbleBg,
+            border = if (!isCurrentUser) androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE5E7EB)) else null,
+            shadowElevation = if (!isCurrentUser) 2.dp else 3.dp,
             modifier = Modifier
-                .widthIn(min = 60.dp, max = 290.dp)
+                .widthIn(min = 70.dp, max = 300.dp)
                 .clip(bubbleShape)
                 .combinedClickable(
                     onClick = { /* normal tap */ },
@@ -94,118 +96,127 @@ fun MessageBubble(
                             .padding(bottom = 6.dp)
                             .clip(RoundedCornerShape(10.dp))
                             .background(
-                                if (isCurrentUser) Color.Black.copy(alpha = 0.15f)
-                                else Color.White
+                                if (isCurrentUser) Color.White.copy(alpha = 0.12f)
+                                else Color(0xFFF4F5F7)
                             )
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .padding(horizontal = 10.dp, vertical = 6.dp)
                     ) {
                         Column {
                             Text(
                                 text = message.replyToSenderName ?: "Reply",
-                                fontSize = 11.sp,
+                                fontSize = 11.5.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (isCurrentUser) Color.White else OmigramAccentBlue
+                                color = if (isCurrentUser) Color(0xFF93C5FD) else SocialBrandBlue
                             )
                             Text(
                                 text = message.replyToContent,
                                 fontSize = 12.sp,
                                 maxLines = 1,
-                                color = if (isCurrentUser) Color.White.copy(alpha = 0.85f) else OmigramSecondaryText
+                                color = if (isCurrentUser) Color.White.copy(alpha = 0.85f) else Color(0xFF6B7280)
                             )
                         }
                     }
                 }
 
-                // Message Text Content
-                Text(
-                    text = message.content,
-                    fontSize = 15.sp,
-                    color = contentColor,
-                    lineHeight = 20.sp
-                )
+                // Voice Note or Regular Content
+                if (isVoiceNote) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    ) {
+                        Surface(
+                            shape = CircleShape,
+                            color = if (isCurrentUser) Color.White.copy(alpha = 0.2f) else SocialBrandBlue.copy(alpha = 0.15f),
+                            modifier = Modifier.size(34.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Filled.PlayArrow,
+                                    contentDescription = "Play voice note",
+                                    tint = if (isCurrentUser) Color.White else SocialBrandBlue,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
+                        // Waveform simulation bars
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(2.5.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            val barHeights = listOf(8, 14, 22, 12, 18, 24, 16, 20, 10, 14, 6)
+                            barHeights.forEach { h ->
+                                Box(
+                                    modifier = Modifier
+                                        .width(3.dp)
+                                        .height(h.dp)
+                                        .clip(RoundedCornerShape(1.5.dp))
+                                        .background(
+                                            if (isCurrentUser) Color.White.copy(alpha = 0.7f)
+                                            else SocialBrandBlue.copy(alpha = 0.6f)
+                                        )
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "0:14",
+                            fontSize = 11.sp,
+                            color = if (isCurrentUser) Color.White.copy(alpha = 0.7f) else Color(0xFF6B7280)
+                        )
+                    }
+                } else {
+                    // Regular Message Content
+                    Text(
+                        text = message.content,
+                        fontSize = 14.5.sp,
+                        color = contentColor,
+                        lineHeight = 20.sp
+                    )
+                }
             }
         }
 
-        // Timestamp below bubbles in small gray text as strictly specified
+        // Timestamp below bubbles in small clean text
         Row(
-            modifier = Modifier.padding(top = 2.dp, start = 4.dp, end = 4.dp),
+            modifier = Modifier.padding(top = 3.dp, start = 4.dp, end = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = timeString,
                 fontSize = 11.sp,
-                color = OmigramSecondaryText
+                color = Color(0xFF8E8E93)
             )
             if (isCurrentUser) {
-                Spacer(modifier = Modifier.width(3.dp))
+                Spacer(modifier = Modifier.width(4.dp))
                 Icon(
                     imageVector = if (message.status == MessageStatus.READ) Icons.Default.DoneAll else Icons.Default.Done,
                     contentDescription = "Delivered",
-                    tint = if (message.status == MessageStatus.READ) OmigramAccentBlue else OmigramSecondaryText,
-                    modifier = Modifier.size(13.dp)
+                    tint = if (message.status == MessageStatus.READ) SocialBrandBlue else Color(0xFF8E8E93),
+                    modifier = Modifier.size(14.dp)
                 )
             }
         }
 
         // Reactions display
         if (message.reactions.isNotEmpty()) {
-            val reactionCounts = message.reactions.groupBy { it.reaction }
             Row(
                 modifier = Modifier
                     .padding(top = 2.dp)
-                    .testTag("reactions_row_${message.id}"),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color.White)
+                    .border(androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE5E7EB)), RoundedCornerShape(12.dp))
+                    .padding(horizontal = 6.dp, vertical = 2.dp),
+                horizontalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                reactionCounts.forEach { (emoji, list) ->
-                    val hasUserReacted = list.any { it.userId == SampleData.CURRENT_USER_ID }
-                    Surface(
-                        shape = CircleShape,
-                        color = if (hasUserReacted) Color(0xFFE0F2FE) else OmigramSecondaryBackground,
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .clickable { onReactionClick(emoji) }
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(text = emoji, fontSize = 12.sp)
-                            if (list.size > 1) {
-                                Spacer(modifier = Modifier.width(3.dp))
-                                Text(
-                                    text = list.size.toString(),
-                                    fontSize = 11.sp,
-                                    color = OmigramSecondaryText
-                                )
-                            }
-                        }
-                    }
+                message.reactions.forEach { reaction ->
+                    Text(
+                        text = reaction.reaction,
+                        fontSize = 12.sp,
+                        modifier = Modifier.clickable { onReactionClick(reaction.reaction) }
+                    )
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun DateSeparator(dateText: String, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 12.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Surface(
-            shape = RoundedCornerShape(999.dp),
-            color = OmigramSecondaryBackground,
-            modifier = Modifier.testTag("date_separator")
-        ) {
-            Text(
-                text = dateText,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Medium,
-                color = OmigramSecondaryText,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
-            )
         }
     }
 }

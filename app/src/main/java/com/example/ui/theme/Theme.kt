@@ -1,8 +1,36 @@
 package com.example.ui.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+
+private val OmigramDarkColorScheme = darkColorScheme(
+    primary = OmigramAccentBlue,
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFF1E293B),
+    onPrimaryContainer = Color(0xFFF1F5F9),
+    secondary = Color(0xFF94A3B8),
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFF1E293B),
+    onSecondaryContainer = Color(0xFFF1F5F9),
+    tertiary = OmigramAccentBlue,
+    onTertiary = Color.White,
+    tertiaryContainer = Color(0xFF1E293B),
+    onTertiaryContainer = Color(0xFFF1F5F9),
+    background = Color(0xFF0F172A),
+    onBackground = Color(0xFFF8FAFC),
+    surface = Color(0xFF1E293B),
+    onSurface = Color(0xFFF8FAFC),
+    surfaceVariant = Color(0xFF334155),
+    onSurfaceVariant = Color(0xFFCBD5E1),
+    outline = Color(0xFF334155),
+    outlineVariant = Color(0xFF1E293B),
+    error = OmigramErrorRed,
+    onError = Color.White
+)
 
 // Force Light Mode Only Palette as specified
 private val OmigramLightColorScheme = lightColorScheme(
@@ -32,11 +60,11 @@ private val OmigramLightColorScheme = lightColorScheme(
 
 @Composable
 fun OmigramTheme(
+    darkTheme: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    // Light mode forced: ignore system dark theme and dynamic theming
     MaterialTheme(
-        colorScheme = OmigramLightColorScheme,
+        colorScheme = if (darkTheme) OmigramDarkColorScheme else OmigramLightColorScheme,
         typography = Typography,
         content = content
     )

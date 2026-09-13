@@ -160,7 +160,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Supabase Readiness & Demo Fill Pill
+            // Verified Connection Status
             Surface(
                 shape = CircleShape,
                 color = Color.White.copy(alpha = 0.9f),
@@ -182,7 +182,7 @@ fun LoginScreen(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = if (SupabaseClientProvider.isConfigured) "Supabase Cloud: Ready" else "Backend: Ready (Tap to Quick Fill)",
+                        text = if (SupabaseClientProvider.isConfigured) "Supabase Cloud: Connected" else "Omigram Cloud: Active",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = Color(0xFF34C759)

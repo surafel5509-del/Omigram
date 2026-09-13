@@ -527,3 +527,28 @@ fun SettingsToggleItem(
         }
     )
 }
+
+@Composable
+fun DateSeparator(dateText: String, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = Color(0xFFF0F1F3)
+        ) {
+            Text(
+                text = dateText,
+                fontSize = 11.5.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color(0xFF8E8E93),
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+            )
+        }
+    }
+}
+
+

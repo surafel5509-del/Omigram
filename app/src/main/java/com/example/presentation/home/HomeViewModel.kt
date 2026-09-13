@@ -9,6 +9,7 @@ import com.example.core.model.CallType
 import com.example.core.model.Chat
 import com.example.core.model.Contact
 import com.example.core.model.Post
+import com.example.core.model.Reel
 import com.example.core.model.Story
 import com.example.core.model.User
 import com.example.data.local.SampleData
@@ -126,6 +127,15 @@ class HomeViewModel(
     fun addNewPost(newPost: Post) {
         _posts.value = listOf(newPost) + _posts.value
         selectTab(OmigramTab.HOME)
+    }
+
+    fun addNewStory(newStory: Story) {
+        _stories.value = listOf(newStory) + _stories.value
+        selectTab(OmigramTab.HOME)
+    }
+
+    fun addNewReel(newReel: Reel) {
+        selectTab(OmigramTab.REELS)
     }
 
     fun toggleSearch() {

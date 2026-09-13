@@ -38,6 +38,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Reply
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.VolumeOff
 import androidx.compose.material3.DropdownMenu
@@ -47,6 +48,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -57,7 +60,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -102,11 +108,19 @@ fun ChatScreen(
     val messages by viewModel.messages.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
 
+    var isSearchingMessages by remember { mutableStateOf(false) }
+    var messageSearchQuery by remember { mutableStateOf("") }
+
+    val displayedMessages = remember(messages, messageSearchQuery) {
+        if (messageSearchQuery.isBlank()) messages
+        else messages.filter { it.content.contains(messageSearchQuery, ignoreCase = true) }
+    }
+
     val listState = rememberLazyListState()
 
-    LaunchedEffect(messages.size) {
-        if (messages.isNotEmpty()) {
-            listState.animateScrollToItem(messages.size - 1)
+    LaunchedEffect(displayedMessages.size) {
+        if (displayedMessages.isNotEmpty()) {
+            listState.animateScrollToItem(displayedMessages.size - 1)
         }
     }
 
@@ -116,109 +130,196 @@ fun ChatScreen(
             .background(OmigramBackground)
             .testTag("chat_screen"),
         topBar = {
-            TopAppBar(
-                title = {
-                    val participant = chat?.participant
-                    if (participant != null) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.clickable { onNavigateToUserProfile(participant.id) }
-                        ) {
-                            Box(modifier = Modifier.size(38.dp)) {
-                                AsyncImage(
-                                    model = participant.avatarUrl,
-                                    contentDescription = participant.fullName,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .clip(CircleShape)
-                                        .border(1.dp, OmigramBorder, CircleShape)
-                                )
-                                if (participant.isOnline) {
-                                    Box(
+            Column {
+                TopAppBar(
+                    title = {
+                        val participant = chat?.participant
+                        if (participant != null) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.clickable { onNavigateToUserProfile(participant.id) }
+                            ) {
+                                Box(modifier = Modifier.size(38.dp)) {
+                                    AsyncImage(
+                                        model = participant.avatarUrl,
+                                        contentDescription = participant.fullName,
                                         modifier = Modifier
-                                            .size(11.dp)
+                                            .fillMaxSize()
                                             .clip(CircleShape)
-                                            .background(OnlineGreen)
-                                            .border(1.5.dp, OmigramBackground, CircleShape)
-                                            .align(Alignment.BottomEnd)
+                                            .border(1.dp, OmigramBorder, CircleShape)
+                                    )
+                                    if (participant.isOnline) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(11.dp)
+                                                .clip(CircleShape)
+                                                .background(OnlineGreen)
+                                                .border(1.5.dp, OmigramBackground, CircleShape)
+                                                .align(Alignment.BottomEnd)
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Column {
+                                    Text(
+                                        text = participant.fullName,
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = OmigramPrimaryText,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        text = if (participant.isOnline) "Active now" else "Active recently",
+                                        fontSize = 11.sp,
+                                        color = if (participant.isOnline) OnlineGreen else OmigramSecondaryText
                                     )
                                 }
                             }
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Column {
+                        }
+                    },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = onNavigateBack,
+                            modifier = Modifier.testTag("chat_back_button")
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                                tint = OmigramPrimaryText
+                            )
+                        }
+                    },
+                    actions = {
+                        val participant = chat?.participant
+
+                        // In-chat Search toggle
+                        IconButton(
+                            onClick = {
+                                isSearchingMessages = !isSearchingMessages
+                                if (!isSearchingMessages) messageSearchQuery = ""
+                            },
+                            modifier = Modifier.testTag("chat_search_toggle_button")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Search messages",
+                                tint = if (isSearchingMessages) Color(0xFF007AFF) else OmigramPrimaryText
+                            )
+                        }
+
+                        IconButton(
+                            onClick = {
+                                if (participant != null) onStartCall(participant, false)
+                            },
+                            modifier = Modifier.testTag("chat_voice_call_button")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Call,
+                                contentDescription = "Audio call",
+                                tint = OmigramPrimaryText
+                            )
+                        }
+
+                        IconButton(
+                            onClick = {
+                                if (participant != null) onStartCall(participant, true)
+                            },
+                            modifier = Modifier.testTag("chat_video_call_button")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Videocam,
+                                contentDescription = "Video call",
+                                tint = OmigramPrimaryText
+                            )
+                        }
+
+                        IconButton(
+                            onClick = {
+                                if (participant != null) onNavigateToUserProfile(participant.id)
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = "Chat details",
+                                tint = OmigramPrimaryText
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = OmigramBackground
+                    )
+                )
+
+                // Expandable In-Chat Search Bar
+                AnimatedVisibility(visible = isSearchingMessages) {
+                    Surface(
+                        color = Color(0xFFF7F8FA),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 14.dp, vertical = 6.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE5E7EB))
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 2.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = null,
+                                tint = Color(0xFF8E8E93),
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            OutlinedTextField(
+                                value = messageSearchQuery,
+                                onValueChange = { messageSearchQuery = it },
+                                placeholder = {
+                                    Text(
+                                        text = "Search in conversation...",
+                                        fontSize = 13.5.sp,
+                                        color = Color(0xFF8E8E93)
+                                    )
+                                },
+                                singleLine = true,
+                                colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    focusedBorderColor = Color.Transparent,
+                                    unfocusedBorderColor = Color.Transparent
+                                ),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(44.dp)
+                                    .testTag("in_chat_search_input")
+                            )
+                            if (messageSearchQuery.isNotEmpty()) {
                                 Text(
-                                    text = participant.fullName,
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = OmigramPrimaryText,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                                    text = "${displayedMessages.size} matches",
+                                    fontSize = 11.5.sp,
+                                    color = Color(0xFF007AFF),
+                                    fontWeight = FontWeight.SemiBold,
+                                    modifier = Modifier.padding(end = 6.dp)
                                 )
-                                Text(
-                                    text = if (participant.isOnline) "Active now" else "Active recently",
-                                    fontSize = 11.sp,
-                                    color = if (participant.isOnline) OnlineGreen else OmigramSecondaryText
-                                )
+                                IconButton(
+                                    onClick = { messageSearchQuery = "" },
+                                    modifier = Modifier.size(24.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "Clear",
+                                        tint = Color(0xFF8E8E93),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
                             }
                         }
                     }
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = onNavigateBack,
-                        modifier = Modifier.testTag("chat_back_button")
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = OmigramPrimaryText
-                        )
-                    }
-                },
-                actions = {
-                    val participant = chat?.participant
-                    IconButton(
-                        onClick = {
-                            if (participant != null) onStartCall(participant, false)
-                        },
-                        modifier = Modifier.testTag("chat_voice_call_button")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Call,
-                            contentDescription = "Audio call",
-                            tint = OmigramPrimaryText
-                        )
-                    }
-
-                    IconButton(
-                        onClick = {
-                            if (participant != null) onStartCall(participant, true)
-                        },
-                        modifier = Modifier.testTag("chat_video_call_button")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Videocam,
-                            contentDescription = "Video call",
-                            tint = OmigramPrimaryText
-                        )
-                    }
-
-                    IconButton(
-                        onClick = {
-                            if (participant != null) onNavigateToUserProfile(participant.id)
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = "Chat details",
-                            tint = OmigramPrimaryText
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = OmigramBackground
-                )
-            )
+                }
+            }
         },
         bottomBar = {
             Column {
@@ -253,34 +354,49 @@ fun ChatScreen(
                 .padding(innerPadding)
                 .background(OmigramBackground)
         ) {
-            LazyColumn(
-                state = listState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(vertical = 8.dp)
-                    .testTag("chat_messages_list")
-            ) {
-                var lastDate = ""
-                messages.forEachIndexed { index, message ->
-                    val msgDate = SimpleDateFormat("MMMM d, yyyy", Locale.getDefault()).format(Date(message.createdAt))
-                    if (msgDate != lastDate) {
-                        val isToday = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date()) ==
-                                SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date(message.createdAt))
-                        val label = if (isToday) "Today" else msgDate
-                        item(key = "date_${msgDate}_$index") {
-                            DateSeparator(dateText = label)
+            if (displayedMessages.isEmpty() && messageSearchQuery.isNotBlank()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No messages found for \"$messageSearchQuery\"",
+                        fontSize = 14.sp,
+                        color = Color(0xFF8E8E93)
+                    )
+                }
+            } else {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(vertical = 8.dp)
+                        .testTag("chat_messages_list")
+                ) {
+                    var lastDate = ""
+                    displayedMessages.forEachIndexed { index, message ->
+                        val msgDate = SimpleDateFormat("MMMM d, yyyy", Locale.getDefault()).format(Date(message.createdAt))
+                        if (msgDate != lastDate) {
+                            val isToday = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date()) ==
+                                    SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date(message.createdAt))
+                            val label = if (isToday) "Today" else msgDate
+                            item(key = "date_${msgDate}_$index") {
+                                DateSeparator(dateText = label)
+                            }
+                            lastDate = msgDate
                         }
-                        lastDate = msgDate
-                    }
 
-                    item(key = message.id) {
-                        val isCurrentUser = message.senderId == SampleData.CURRENT_USER_ID
-                        MessageBubble(
-                            message = message,
-                            isCurrentUser = isCurrentUser,
-                            onLongClick = { viewModel.selectMessageForMenu(message) },
-                            onReactionClick = { emoji -> viewModel.toggleReaction(message.id, emoji) }
-                        )
+                        item(key = message.id) {
+                            val isCurrentUser = message.senderId == SampleData.CURRENT_USER_ID
+                            MessageBubble(
+                                message = message,
+                                isCurrentUser = isCurrentUser,
+                                onLongClick = { viewModel.selectMessageForMenu(message) },
+                                onReactionClick = { emoji -> viewModel.toggleReaction(message.id, emoji) }
+                            )
+                        }
                     }
                 }
             }
